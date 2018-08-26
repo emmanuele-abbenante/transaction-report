@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -20,6 +21,9 @@ import org.slf4j.LoggerFactory;
 
 import com.emmanuele.transaction_report.bindings.Table;
 import com.emmanuele.transaction_report.bindings.Tr;
+import com.emmanuele.transactionreport.dao.DbConf;
+import com.emmanuele.transactionreport.dao.TransactionDao;
+import com.emmanuele.transactionreport.dao.TransactionReportDataSource;
 
 public class App {
 
@@ -52,6 +56,15 @@ public class App {
 			final String fileContent = readFile(filePath);
 			final Table table = parseXml(fileContent);
 			final List<Transaction> transactions = buildTransactions(table);
+			final Properties properties = buildDbProperties();
+			DbConf.init(properties);
+			final TransactionReportDataSource videoDataSource = TransactionReportDataSource
+					.getInstance();
+			videoDataSource.init(DbConf.getInstance());
+
+			final TransactionDao dao = TransactionDao.getInstance();
+			dao.init(videoDataSource.getDataSource());
+			dao.create(transactions);
 		} catch (final Exception e) {
 			log.error("", e);
 		}
@@ -114,6 +127,15 @@ public class App {
 			log.error("", e);
 		}
 		return transaction;
+	}
+
+	private static Properties buildDbProperties() {
+		final Properties properties = new Properties();
+		properties.setProperty("DB_USER", "");
+		properties.setProperty("DB_PSW", "");
+		properties.setProperty("DB_DRIVER", "com.mysql.jdbc.Driver");
+		properties.setProperty("DB_URL", "");
+		return properties;
 	}
 
 }
