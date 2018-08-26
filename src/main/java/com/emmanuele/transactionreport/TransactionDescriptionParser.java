@@ -13,7 +13,9 @@ public class TransactionDescriptionParser {
 			.ofPattern("dd/MM/yyyy HH:mm");
 
 	private static final Pattern VPAY_OPERATION = Pattern
-			.compile("Operazione VPAY del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) \\/ Importo in Euro=(?<euramount>.*)[ \t\n]*presso (?<counterpart>.*)( - Transazione C-less)?");
+			.compile("Operazione VPAY del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) \\/ Importo in Euro=(?<euramount>.*)[ \t\n]*presso (?<counterpart>.*)");
+	private static final Pattern VPAY_CONTACTLESS_OPERATION = Pattern
+			.compile("Operazione VPAY del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) \\/ Importo in Euro=(?<euramount>.*)[ \t\n]*presso (?<counterpart>.*) - Transazione C-less");
 	private static final Pattern WITHDRAWAL_OPERATION = Pattern
 			.compile("Prelievo carta del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) di Abi Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) / Importo in[ \t\n]*Euro=(?<euramount>.*) presso (?<counterpart>.*)");
 	private static final Pattern CREDIT_CARD_FEE_OPERATION = Pattern
@@ -33,7 +35,12 @@ public class TransactionDescriptionParser {
 	public static Transaction parseDescription(final String description) {
 		final String cleanedDescriptionStr = description.replaceAll(
 				NOT_ALLOWED_CHARACTERS_REGEX, "");
-		Matcher matcher = VPAY_OPERATION.matcher(cleanedDescriptionStr);
+		Matcher matcher = VPAY_CONTACTLESS_OPERATION
+				.matcher(cleanedDescriptionStr);
+		if (matcher.matches()) {
+			return parseVPayOperationDescription(matcher);
+		}
+		matcher = VPAY_OPERATION.matcher(cleanedDescriptionStr);
 		if (matcher.matches()) {
 			return parseVPayOperationDescription(matcher);
 		}
