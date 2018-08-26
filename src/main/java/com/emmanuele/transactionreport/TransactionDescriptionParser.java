@@ -13,7 +13,7 @@ public class TransactionDescriptionParser {
 			.ofPattern("dd/MM/yyyy HH:mm");
 
 	private static final Pattern VPAY_OPERATION = Pattern
-			.compile("Operazione VPAY del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) \\/ Importo in Euro=(?<euramount>.*)[ \t\n]*presso (?<counterpart>.*) - Transazione C-less");
+			.compile("Operazione VPAY del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) \\/ Importo in Euro=(?<euramount>.*)[ \t\n]*presso (?<counterpart>.*)( - Transazione C-less)?");
 	private static final Pattern WITHDRAWAL_OPERATION = Pattern
 			.compile("Prelievo carta del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) di Abi Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) / Importo in[ \t\n]*Euro=(?<euramount>.*) presso (?<counterpart>.*)");
 	private static final Pattern CREDIT_CARD_FEE_OPERATION = Pattern
@@ -24,6 +24,8 @@ public class TransactionDescriptionParser {
 			.compile(".* ADDEBITO CARTA CREDITO .* E\\/C AL .* COD\\.CLIENTE: .*");
 	private static final Pattern PAYMENT_OPERATION = Pattern
 			.compile("BONIFICO DA VOI DISPOSTO NOP .* A FAVORE DI (?<counterpart>.*) C. BENEF. (?<counterpartiban>.*) NOTE: (?<paymentreason>.*)");
+	private static final Pattern INCOMING_PAYMENT_OPERATION = Pattern
+			.compile("Bonifico N. .* BIC Ordinante .* Data Ordine Codifica Ordinante (?<counterpartiban>.*) Anagrafica Ordinante (?<counterpart>.*) Note: (?<paymentreason>.*)");
 
 	private TransactionDescriptionParser() {
 	}
@@ -52,6 +54,10 @@ public class TransactionDescriptionParser {
 			return parseGenericDescription(matcher);
 		}
 		matcher = PAYMENT_OPERATION.matcher(cleanedDescriptionStr);
+		if (matcher.matches()) {
+			return parsePaymentOperationDescription(matcher);
+		}
+		matcher = INCOMING_PAYMENT_OPERATION.matcher(cleanedDescriptionStr);
 		if (matcher.matches()) {
 			return parsePaymentOperationDescription(matcher);
 		}
