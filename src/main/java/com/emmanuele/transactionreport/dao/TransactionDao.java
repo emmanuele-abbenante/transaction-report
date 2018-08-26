@@ -31,7 +31,7 @@ public class TransactionDao extends AbstractDao<Transaction> implements
 	}
 
 	public void create(final Transaction transaction) {
-		final String query = "INSERT INTO TRANSACTION_REPORT."
+		final String query = "INSERT INTO "
 				+ TABLE_NAME
 				+ " (TRANSACTION_DATE_TIME, VALUE_DATE, REASON, DESCRIPTION, CURRENCY, "
 				+ "CURRENCY_AMOUNT, CARD_NUMBER, EUR_AMOUNT, COUNTERPART, ATM_NAME, "
