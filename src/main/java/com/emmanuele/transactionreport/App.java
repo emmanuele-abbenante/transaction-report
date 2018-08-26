@@ -53,7 +53,8 @@ public class App {
 		}
 		try {
 			final String filePath = args[0];
-			final String fileContent = readFile(filePath);
+			final String fileContent = readFile(filePath).replace('\t', ' ')
+					.replace("   ", " ");
 			final Table table = parseXml(fileContent);
 			final List<Transaction> transactions = buildTransactions(table);
 			final Properties properties = buildDbProperties();
@@ -76,8 +77,7 @@ public class App {
 				final BufferedReader br = new BufferedReader(fr);) {
 			String line;
 			while ((line = br.readLine()) != null) {
-				transactionsFileStr.append(line.replace('\t', ' ').replace(
-						"   ", " "));
+				transactionsFileStr.append(line);
 			}
 		}
 		return transactionsFileStr.toString();
