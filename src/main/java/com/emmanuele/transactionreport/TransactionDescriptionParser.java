@@ -20,14 +20,18 @@ public class TransactionDescriptionParser {
 			.compile("Prelievo carta del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) di Abi Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) / Importo in[ \t\n]*Euro=(?<euramount>.*) presso (?<counterpart>.*)");
 	private static final Pattern CREDIT_CARD_FEE_OPERATION = Pattern
 			.compile("Canone mensile Carta di Credito");
-	private static final Pattern MONEY_TRANSFER_OPERATION = Pattern
-			.compile("DA .* Giroconto");
+	private static final Pattern INCOMING_MONEY_TRANSFER_OPERATION = Pattern
+			.compile("DA (?<counterpartiban>.*) Giroconto");
+	private static final Pattern OUTGOING_MONEY_TRANSFER_OPERATION = Pattern
+			.compile("A (?<counterpartiban>.*) Giroconto.");
 	private static final Pattern CREDIT_CARD_CHARGE_OPERATION = Pattern
 			.compile(".* ADDEBITO CARTA CREDITO .* E\\/C AL .* COD\\.CLIENTE: .*");
 	private static final Pattern PAYMENT_OPERATION = Pattern
 			.compile("BONIFICO DA VOI DISPOSTO NOP .* A FAVORE DI (?<counterpart>.*) C. BENEF. (?<counterpartiban>.*) NOTE: (?<paymentreason>.*)");
 	private static final Pattern INCOMING_PAYMENT_OPERATION = Pattern
 			.compile("Bonifico N. .* BIC Ordinante .* Data Ordine Codifica Ordinante (?<counterpartiban>.*) Anagrafica Ordinante (?<counterpart>.*) Note: (?<paymentreason>.*)");
+	private static final Pattern PREPAID_CARD_CHARGE_OPERATION = Pattern
+			.compile("Ricarica carta prepagata MasterCard ING Direct");
 
 	private TransactionDescriptionParser() {
 	}
@@ -52,9 +56,15 @@ public class TransactionDescriptionParser {
 		if (matcher.matches()) {
 			return parseGenericDescription(matcher);
 		}
-		matcher = MONEY_TRANSFER_OPERATION.matcher(cleanedDescriptionStr);
+		matcher = INCOMING_MONEY_TRANSFER_OPERATION
+				.matcher(cleanedDescriptionStr);
 		if (matcher.matches()) {
-			return parseGenericDescription(matcher);
+			return parseMoneyTransferDescription(matcher);
+		}
+		matcher = OUTGOING_MONEY_TRANSFER_OPERATION
+				.matcher(cleanedDescriptionStr);
+		if (matcher.matches()) {
+			return parseMoneyTransferDescription(matcher);
 		}
 		matcher = CREDIT_CARD_CHARGE_OPERATION.matcher(cleanedDescriptionStr);
 		if (matcher.matches()) {
@@ -67,6 +77,10 @@ public class TransactionDescriptionParser {
 		matcher = INCOMING_PAYMENT_OPERATION.matcher(cleanedDescriptionStr);
 		if (matcher.matches()) {
 			return parsePaymentOperationDescription(matcher);
+		}
+		matcher = PREPAID_CARD_CHARGE_OPERATION.matcher(cleanedDescriptionStr);
+		if (matcher.matches()) {
+			return parseGenericDescription(matcher);
 		}
 		throw new IllegalArgumentException("Unknown description: "
 				+ description);
@@ -99,6 +113,13 @@ public class TransactionDescriptionParser {
 		transaction.setCounterpart(matcher.group("counterpart"));
 		transaction.setCounterpartIban(matcher.group("counterpartiban"));
 		transaction.setPaymentReason(matcher.group("paymentreason"));
+		return transaction;
+	}
+
+	private static Transaction parseMoneyTransferDescription(
+			final Matcher matcher) {
+		final Transaction transaction = new Transaction();
+		transaction.setCounterpartIban(matcher.group("counterpartiban"));
 		return transaction;
 	}
 
