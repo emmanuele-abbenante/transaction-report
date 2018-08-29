@@ -93,39 +93,37 @@ public class App {
 	private static List<Transaction> buildTransactions(final Table table) {
 		final List<Transaction> transactions = new ArrayList<>();
 		for (final Tr row : table.getTr()) {
-			final String description = row.getTd().get(3).getContent();
-			log.info(description);
-			if (DESCRIPTION_HEADER.equals(description)) {
-				continue;
+			try {
+				final String description = row.getTd().get(3).getContent();
+				log.info(description);
+				if (DESCRIPTION_HEADER.equals(description)) {
+					continue;
+				}
+				transactions.add(buildTransaction(row));
+			} catch (Exception e) {
+				log.error("", e);
 			}
-			transactions.add(buildTransaction(row));
 		}
 		return transactions;
 	}
 
 	private static Transaction buildTransaction(final Tr row) {
-		Transaction transaction = new Transaction();
-		try {
-			final String description = row.getTd().get(3).getContent();
-			final String reason = row.getTd().get(2).getContent();
-			transaction = TransactionDescriptionParser
-					.parseDescription(description);
-			transaction.setValueDate(LocalDate.parse(row.getTd().get(0)
-					.getContent(), DATE_FORMATTER));
-			transaction.setReason(reason);
-			transaction.setDescription(description);
-			final String currencyAndAmount = row.getTd().get(4).getContent()
-					.trim().replaceAll("\\.", "").replace(',', '.')
-					.replaceAll(" ", "");
-			final String currency = currencyAndAmount.substring(0, 3);
-			transaction.setCurrency(currency);
-			final String currencyAmount = currencyAndAmount.substring(3,
-					currencyAndAmount.length());
-			transaction.setCurrencyAmount(Double.valueOf(currencyAmount));
-			log.info(transaction.toString());
-		} catch (Exception e) {
-			log.error("", e);
-		}
+		final String description = row.getTd().get(3).getContent();
+		final String reason = row.getTd().get(2).getContent();
+		final Transaction transaction = TransactionDescriptionParser
+				.parseDescription(description);
+		transaction.setValueDate(LocalDate.parse(row.getTd().get(0)
+				.getContent(), DATE_FORMATTER));
+		transaction.setReason(reason);
+		transaction.setDescription(description);
+		final String currencyAndAmount = row.getTd().get(4).getContent().trim()
+				.replaceAll("\\.", "").replace(',', '.').replaceAll(" ", "");
+		final String currency = currencyAndAmount.substring(0, 3);
+		transaction.setCurrency(currency);
+		final String currencyAmount = currencyAndAmount.substring(3,
+				currencyAndAmount.length());
+		transaction.setCurrencyAmount(Double.valueOf(currencyAmount));
+		log.info(transaction.toString());
 		return transaction;
 	}
 

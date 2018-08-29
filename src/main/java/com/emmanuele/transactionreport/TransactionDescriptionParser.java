@@ -22,6 +22,8 @@ public class TransactionDescriptionParser {
 			.compile("Canone mensile Carta di Credito");
 	private static final Pattern INCOMING_MONEY_TRANSFER_OPERATION = Pattern
 			.compile("DA (?<counterpartiban>.*) Giroconto");
+	private static final Pattern INCOMING_MONEY_TRANSFER_OPERATION_2 = Pattern
+			.compile("DA (?<counterpartiban>.*) GIRO da .*");
 	private static final Pattern OUTGOING_MONEY_TRANSFER_OPERATION = Pattern
 			.compile("A (?<counterpartiban>.*) Giroconto.");
 	private static final Pattern CREDIT_CARD_CHARGE_OPERATION = Pattern
@@ -57,6 +59,11 @@ public class TransactionDescriptionParser {
 			return parseGenericDescription(matcher);
 		}
 		matcher = INCOMING_MONEY_TRANSFER_OPERATION
+				.matcher(cleanedDescriptionStr);
+		if (matcher.matches()) {
+			return parseMoneyTransferDescription(matcher);
+		}
+		matcher = INCOMING_MONEY_TRANSFER_OPERATION_2
 				.matcher(cleanedDescriptionStr);
 		if (matcher.matches()) {
 			return parseMoneyTransferDescription(matcher);
