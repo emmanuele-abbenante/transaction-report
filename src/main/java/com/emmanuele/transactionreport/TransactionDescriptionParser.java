@@ -20,6 +20,8 @@ public class TransactionDescriptionParser {
 			.compile("Operazione VPAY del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) \\/ Importo in Euro=(?<euramount>.*)[ \t\n]*presso (?<counterpart>.*)\\.Tasso di cambio (?<foreignCurrency>.*)/EUR=(?<exchangeRate>.*) - Transazione C-less.*");
 	private static final Pattern WITHDRAWAL_OPERATION = Pattern
 			.compile("Prelievo carta del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) di Abi Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) / Importo in[ \t\n]*Euro=(?<euramount>.*) presso (?<counterpart>.*)");
+	private static final Pattern FOREIGN_WITHDRAWAL_OPERATION = Pattern
+			.compile("Prelievo carta del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) di Abi Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) / Importo in[ \t\n]*Euro=(?<euramount>.*) presso (?<counterpart>.*)\\.Tasso di cambio (?<foreignCurrency>.*)/EUR=(?<exchangeRate>.*)");
 	private static final Pattern CREDIT_CARD_FEE_OPERATION = Pattern
 			.compile("Canone mensile Carta di Credito");
 	private static final Pattern INCOMING_MONEY_TRANSFER_OPERATION = Pattern
@@ -59,6 +61,10 @@ public class TransactionDescriptionParser {
 		matcher = VPAY_OPERATION.matcher(cleanedDescriptionStr);
 		if (matcher.matches()) {
 			return parseVPayOperationDescription(matcher);
+		}
+		matcher = FOREIGN_WITHDRAWAL_OPERATION.matcher(cleanedDescriptionStr);
+		if (matcher.matches()) {
+			return parseVPayForeignOperationDescription(matcher);
 		}
 		matcher = WITHDRAWAL_OPERATION.matcher(cleanedDescriptionStr);
 		if (matcher.matches()) {
