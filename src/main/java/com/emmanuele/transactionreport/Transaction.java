@@ -17,6 +17,8 @@ public class Transaction {
 	private String atmName;
 	private String counterpartIban;
 	private String paymentReason;
+	private String foreignCurrency;
+	private Double exchangeRate;
 	
 	public LocalDateTime getTransactionDateTime() {
 		return transactionDateTime;
@@ -90,7 +92,19 @@ public class Transaction {
 	public void setPaymentReason(String paymentReason) {
 		this.paymentReason = paymentReason;
 	}
-	
+	public String getForeignCurrency() {
+		return foreignCurrency;
+	}
+	public void setForeignCurrency(String foreignCurrency) {
+		this.foreignCurrency = foreignCurrency;
+	}
+	public Double getExchangeRate() {
+		return exchangeRate;
+	}
+	public void setExchangeRate(Double exchangeRate) {
+		this.exchangeRate = exchangeRate;
+	}
+
 	@Override
 	public String toString() {
 		return "Transaction [transactionDateTime=" + transactionDateTime

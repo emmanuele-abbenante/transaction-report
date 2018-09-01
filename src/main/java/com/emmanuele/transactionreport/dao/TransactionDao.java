@@ -35,11 +35,11 @@ public class TransactionDao extends AbstractDao<Transaction> implements
 				+ TABLE_NAME
 				+ " (TRANSACTION_DATE_TIME, VALUE_DATE, REASON, DESCRIPTION, CURRENCY, "
 				+ "CURRENCY_AMOUNT, CARD_NUMBER, EUR_AMOUNT, COUNTERPART, ATM_NAME, "
-				+ "COUNTERPART_IBAN, PAYMENT_REASON) "
+				+ "COUNTERPART_IBAN, PAYMENT_REASON, FOREIGN_CURRENCY, EXCHANGE_RATE) "
 				+ "VALUES "
 				+ "(:transactionDateTime, :valueDate, :reason, :description, :currency, "
 				+ ":currencyAmount, :cardNumber, :eurAmount, :counterpart, :atmName, "
-				+ ":counterpartIban, :paymentReason)";
+				+ ":counterpartIban, :paymentReason, :foreignCurrency, :exchangeRate)";
 		final Map<String, Object> params = new HashMap<>();
 		//FIXME time zone issue
 		Timestamp transactionDateTime = null;
@@ -66,6 +66,8 @@ public class TransactionDao extends AbstractDao<Transaction> implements
 		params.put("atmName", transaction.getAtmName());
 		params.put("counterpartIban", transaction.getCounterpartIban());
 		params.put("paymentReason", transaction.getPaymentReason());
+		params.put("foreignCurrency", transaction.getForeignCurrency());
+		params.put("exchangeRate", transaction.getExchangeRate());
 		jdbcTemplate.update(query, params);
 	}
 
