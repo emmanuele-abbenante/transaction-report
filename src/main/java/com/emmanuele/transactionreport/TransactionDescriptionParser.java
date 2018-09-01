@@ -15,7 +15,7 @@ public class TransactionDescriptionParser {
 	private static final Pattern VPAY_OPERATION = Pattern
 			.compile("Operazione VPAY del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) \\/ Importo in Euro=(?<euramount>.*)[ \t\n]*presso (?<counterpart>.*)");
 	private static final Pattern VPAY_CONTACTLESS_OPERATION = Pattern
-			.compile("Operazione VPAY del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) \\/ Importo in Euro=(?<euramount>.*)[ \t\n]*presso (?<counterpart>.*) - Transazione C-less");
+			.compile("Operazione VPAY del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) \\/ Importo in Euro=(?<euramount>.*)[ \t\n]*presso (?<counterpart>.*) - Transazione C-less.*");
 	private static final Pattern WITHDRAWAL_OPERATION = Pattern
 			.compile("Prelievo carta del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) di Abi Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) / Importo in[ \t\n]*Euro=(?<euramount>.*) presso (?<counterpart>.*)");
 	private static final Pattern CREDIT_CARD_FEE_OPERATION = Pattern
@@ -26,6 +26,8 @@ public class TransactionDescriptionParser {
 			.compile("DA (?<counterpartiban>.*) GIRO da .*");
 	private static final Pattern OUTGOING_MONEY_TRANSFER_OPERATION = Pattern
 			.compile("A (?<counterpartiban>.*) Giroconto.");
+	private static final Pattern OUTGOING_MONEY_TRANSFER_OPERATION_2 = Pattern
+			.compile("A (?<counterpartiban>.*) GIRO da CCA .*");
 	private static final Pattern CREDIT_CARD_CHARGE_OPERATION = Pattern
 			.compile(".* ADDEBITO CARTA CREDITO .* E\\/C AL .* COD\\.CLIENTE: .*");
 	private static final Pattern PAYMENT_OPERATION = Pattern
@@ -34,6 +36,8 @@ public class TransactionDescriptionParser {
 			.compile("Bonifico N. .* BIC Ordinante .* Data Ordine Codifica Ordinante (?<counterpartiban>.*) Anagrafica Ordinante (?<counterpart>.*) Note: (?<paymentreason>.*)");
 	private static final Pattern PREPAID_CARD_CHARGE_OPERATION = Pattern
 			.compile("Ricarica carta prepagata MasterCard ING Direct");
+	private static final Pattern PHONE_CHARGE_OPERATION = Pattern
+			.compile("Operazione di ricarica telefonica .* del numero .* eseguita il .* alle ore .* con Id-transazione .*");
 
 	private TransactionDescriptionParser() {
 	}
@@ -73,6 +77,11 @@ public class TransactionDescriptionParser {
 		if (matcher.matches()) {
 			return parseMoneyTransferDescription(matcher);
 		}
+		matcher = OUTGOING_MONEY_TRANSFER_OPERATION_2
+				.matcher(cleanedDescriptionStr);
+		if (matcher.matches()) {
+			return parseMoneyTransferDescription(matcher);
+		}
 		matcher = CREDIT_CARD_CHARGE_OPERATION.matcher(cleanedDescriptionStr);
 		if (matcher.matches()) {
 			return parseGenericDescription(matcher);
@@ -86,6 +95,10 @@ public class TransactionDescriptionParser {
 			return parsePaymentOperationDescription(matcher);
 		}
 		matcher = PREPAID_CARD_CHARGE_OPERATION.matcher(cleanedDescriptionStr);
+		if (matcher.matches()) {
+			return parseGenericDescription(matcher);
+		}
+		matcher = PHONE_CHARGE_OPERATION.matcher(cleanedDescriptionStr);
 		if (matcher.matches()) {
 			return parseGenericDescription(matcher);
 		}
