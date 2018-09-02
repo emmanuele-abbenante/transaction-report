@@ -43,7 +43,9 @@ public class TransactionDescriptionParser {
 	private static final Pattern PHONE_CHARGE_OPERATION = Pattern
 			.compile("Operazione di ricarica telefonica .* del numero .* eseguita il .* alle ore .* con Id-transazione .*");
 	private static final Pattern STAMP_DUTY_OPERATION = Pattern
-			.compile("Imposta di Bollo .*");
+			.compile("Imposta di Bollo.*");
+	private static final Pattern PREPAID_CARD_FEE_OPERATION = Pattern
+			.compile("Commissione per ricarica carta prepagata MasterCard ING Direct");
 
 	private TransactionDescriptionParser() {
 	}
@@ -120,6 +122,10 @@ public class TransactionDescriptionParser {
 		if (matcher.matches()) {
 			return parseGenericDescription(matcher);
 		}
+		matcher = PREPAID_CARD_FEE_OPERATION.matcher(cleanedDescriptionStr);
+		if (matcher.matches()) {
+			return parseGenericDescription(matcher);
+		}
 		throw new IllegalArgumentException("Unknown description: "
 				+ description);
 	}
@@ -128,7 +134,8 @@ public class TransactionDescriptionParser {
 			final Matcher matcher) {
 		final Transaction transaction = parseVPayOperationDescription(matcher);
 		transaction.setForeignCurrency(matcher.group("foreignCurrency"));
-		final String exchangeRate = matcher.group("exchangeRate").replace(',', '.');
+		final String exchangeRate = matcher.group("exchangeRate").replace(',',
+				'.');
 		if (exchangeRate != null) {
 			transaction.setExchangeRate(Double.valueOf(exchangeRate));
 		}
