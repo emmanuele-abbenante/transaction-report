@@ -1,11 +1,13 @@
-package com.emmanuele.transactionreport;
+package com.emmanuele.transactionreport.transaction_manager;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class TransactionDescriptionParser {
+import com.emmanuele.transactionreport.Transaction;
+
+public class CurrentAccountTransactionDescriptionParser {
 
 	private static final String NOT_ALLOWED_CHARACTERS_REGEX = "[^a-zA-Z0-9\\/:=\\.\\-\\s,]";
 
@@ -47,7 +49,7 @@ public class TransactionDescriptionParser {
 	private static final Pattern PREPAID_CARD_FEE_OPERATION = Pattern
 			.compile("Commissione per ricarica carta prepagata MasterCard ING Direct");
 
-	private TransactionDescriptionParser() {
+	private CurrentAccountTransactionDescriptionParser() {
 	}
 
 	public static Transaction parseDescription(final String description) {
