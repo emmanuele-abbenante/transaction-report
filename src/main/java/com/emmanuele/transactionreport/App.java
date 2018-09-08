@@ -17,6 +17,8 @@ import com.emmanuele.transactionreport.utils.FileUtils;
 
 public class App {
 
+	private static final String CONFIG_PROPERTIES_FILE = "config.properties";
+
 	private static final Logger log = LoggerFactory.getLogger(App.class);
 
 	// The JAXB context is thread-safe, so the same instance can be used through
@@ -42,7 +44,8 @@ public class App {
 					.replace('\t', ' ').replace("   ", " ");
 			final List<Transaction> transactions = CurrentAccountTransactionManager
 					.buildTransactions(fileContent);
-			final Properties properties = buildDbProperties();
+			final Properties properties = FileUtils.readProperties(App.class,
+					CONFIG_PROPERTIES_FILE);
 			DbConf.init(properties);
 			final TransactionReportDataSource videoDataSource = TransactionReportDataSource
 					.getInstance();
@@ -54,15 +57,6 @@ public class App {
 		} catch (final Exception e) {
 			log.error("", e);
 		}
-	}
-
-	private static Properties buildDbProperties() {
-		final Properties properties = new Properties();
-		properties.setProperty("DB_USER", "");
-		properties.setProperty("DB_PSW", "");
-		properties.setProperty("DB_DRIVER", "com.mysql.jdbc.Driver");
-		properties.setProperty("DB_URL", "");
-		return properties;
 	}
 
 }
