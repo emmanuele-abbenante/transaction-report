@@ -1,4 +1,4 @@
-package com.emmanuele.transactionreport;
+package com.emmanuele.transaction_report;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

@@ -1,4 +1,4 @@
-package com.emmanuele.transactionreport.dao;
+package com.emmanuele.transaction_report.dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,7 +11,7 @@ import java.util.Map;
 
 import org.springframework.jdbc.core.RowMapper;
 
-import com.emmanuele.transactionreport.Transaction;
+import com.emmanuele.transaction_report.Transaction;
 
 public class TransactionDao extends AbstractDao<Transaction> implements
 		RowMapper<Transaction> {

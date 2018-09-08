@@ -1,4 +1,4 @@
-package com.emmanuele.transactionreport;
+package com.emmanuele.transaction_report;
 
 import java.util.List;
 import java.util.Properties;
@@ -9,11 +9,11 @@ import javax.xml.bind.JAXBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.emmanuele.transactionreport.dao.DbConf;
-import com.emmanuele.transactionreport.dao.TransactionDao;
-import com.emmanuele.transactionreport.dao.TransactionReportDataSource;
-import com.emmanuele.transactionreport.transaction_manager.CurrentAccountTransactionManager;
-import com.emmanuele.transactionreport.utils.FileUtils;
+import com.emmanuele.transaction_report.dao.DbConf;
+import com.emmanuele.transaction_report.dao.TransactionDao;
+import com.emmanuele.transaction_report.dao.TransactionReportDataSource;
+import com.emmanuele.transaction_report.transaction_manager.CurrentAccountTransactionManager;
+import com.emmanuele.transaction_report.utils.FileUtils;
 
 public class App {
 

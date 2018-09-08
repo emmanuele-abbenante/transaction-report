@@ -1,4 +1,4 @@
-package com.emmanuele.transactionreport.transaction_manager;
+package com.emmanuele.transaction_report.transaction_manager;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
@@ -14,10 +14,10 @@ import javax.xml.bind.Unmarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.emmanuele.transaction_report.App;
+import com.emmanuele.transaction_report.Transaction;
 import com.emmanuele.transaction_report.bindings.Table;
 import com.emmanuele.transaction_report.bindings.Tr;
-import com.emmanuele.transactionreport.App;
-import com.emmanuele.transactionreport.Transaction;
 
 public class CurrentAccountTransactionManager {
 

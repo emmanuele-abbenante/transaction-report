@@ -1,11 +1,11 @@
-package com.emmanuele.transactionreport.transaction_manager;
+package com.emmanuele.transaction_report.transaction_manager;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.emmanuele.transactionreport.Transaction;
+import com.emmanuele.transaction_report.Transaction;
 
 public class CurrentAccountTransactionDescriptionParser {
 

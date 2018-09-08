@@ -1,4 +1,4 @@
-package com.emmanuele.transactionreport.dao;
+package com.emmanuele.transaction_report.dao;
 
 import javax.sql.DataSource;
 
