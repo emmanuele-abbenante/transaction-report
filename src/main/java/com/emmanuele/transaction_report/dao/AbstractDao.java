@@ -45,7 +45,7 @@ public abstract class AbstractDao<T> {
 
 	public List<T> selectAll() {
 		return jdbcTemplate.query(
-				String.format("select %s from film", getTableName()),
+				String.format("SELECT * FROM %s", getTableName()),
 				getRowMapper());
 	}
 

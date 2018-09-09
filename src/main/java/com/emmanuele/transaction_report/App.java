@@ -1,5 +1,7 @@
 package com.emmanuele.transaction_report;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -12,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import com.emmanuele.transaction_report.dao.DbConf;
 import com.emmanuele.transaction_report.dao.TransactionDao;
 import com.emmanuele.transaction_report.dao.TransactionReportDataSource;
+import com.emmanuele.transaction_report.transaction_manager.CounterpartyPatternCache;
+import com.emmanuele.transaction_report.transaction_manager.CreditCardTransactionManager;
 import com.emmanuele.transaction_report.transaction_manager.CurrentAccountTransactionManager;
 import com.emmanuele.transaction_report.utils.FileUtils;
 
@@ -34,29 +38,45 @@ public class App {
 	}
 
 	public static void main(final String[] args) {
-		if (args.length == 0) {
-			log.error("Missing file path");
+		if (args.length != 2) {
+			System.err
+					.println("Usage: transaction-report.jar <transactions xml> <transactions source>");
 			return;
 		}
 		try {
-			final String filePath = args[0];
-			final String fileContent = FileUtils.readFile(filePath)
-					.replace('\t', ' ').replace("   ", " ");
-			final List<Transaction> transactions = CurrentAccountTransactionManager
-					.buildTransactions(fileContent);
-			final Properties properties = FileUtils.readProperties(App.class,
-					CONFIG_PROPERTIES_FILE);
-			DbConf.init(properties);
-			final TransactionReportDataSource videoDataSource = TransactionReportDataSource
-					.getInstance();
-			videoDataSource.init(DbConf.getInstance());
+			initDataSource();
 
-			final TransactionDao dao = TransactionDao.getInstance();
-			dao.init(videoDataSource.getDataSource());
-			dao.create(transactions);
+			final String filePath = args[0];
+			final String transactionsSource = args[1];
+			List<Transaction> transactions = new ArrayList<Transaction>();
+			if ("CURRENT_ACCOUNT".equals(transactionsSource)) {
+				transactions = CurrentAccountTransactionManager
+						.buildTransactions(getFileContent(filePath));
+			} else if ("CREDIT_CARD".equals(transactionsSource)) {
+				transactions = CreditCardTransactionManager
+						.buildTransactions(getFileContent(filePath));
+			}
+			TransactionDao.getInstance().create(transactions);
 		} catch (final Exception e) {
 			log.error("", e);
 		}
+	}
+
+	private static void initDataSource() throws Exception {
+		final Properties properties = FileUtils.readProperties(App.class,
+				CONFIG_PROPERTIES_FILE);
+		DbConf.init(properties);
+		final TransactionReportDataSource dataSource = TransactionReportDataSource
+				.getInstance();
+		dataSource.init(DbConf.getInstance());
+		TransactionDao.getInstance().init(dataSource.getDataSource());
+		CounterpartyPatternCache.getInstance().init(dataSource.getDataSource());
+	}
+
+	private static String getFileContent(final String filePath)
+			throws IOException {
+		return FileUtils.readFile(filePath).replace('\t', ' ')
+				.replace("   ", " ");
 	}
 
 }
