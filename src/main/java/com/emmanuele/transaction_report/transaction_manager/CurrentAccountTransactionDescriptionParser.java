@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.emmanuele.transaction_report.Transaction;
+import com.emmanuele.transaction_report.model.Transaction;
 
 public class CurrentAccountTransactionDescriptionParser {
 

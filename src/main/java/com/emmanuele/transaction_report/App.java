@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.emmanuele.transaction_report.dao.DbConf;
 import com.emmanuele.transaction_report.dao.TransactionDao;
 import com.emmanuele.transaction_report.dao.TransactionReportDataSource;
+import com.emmanuele.transaction_report.model.Transaction;
 import com.emmanuele.transaction_report.transaction_manager.CounterpartyPatternCache;
 import com.emmanuele.transaction_report.transaction_manager.CreditCardTransactionManager;
 import com.emmanuele.transaction_report.transaction_manager.CurrentAccountTransactionManager;

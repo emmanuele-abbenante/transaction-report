@@ -7,9 +7,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.emmanuele.transaction_report.Transaction;
 import com.emmanuele.transaction_report.bindings.Table;
 import com.emmanuele.transaction_report.bindings.Tr;
+import com.emmanuele.transaction_report.model.Transaction;
 
 public class CurrentAccountTransactionManager extends BaseTransactionManager {
 

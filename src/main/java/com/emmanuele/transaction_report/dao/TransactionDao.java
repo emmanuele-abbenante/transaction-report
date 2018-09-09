@@ -11,7 +11,7 @@ import java.util.Map;
 
 import org.springframework.jdbc.core.RowMapper;
 
-import com.emmanuele.transaction_report.Transaction;
+import com.emmanuele.transaction_report.model.Transaction;
 
 public class TransactionDao extends AbstractDao<Transaction> implements
 		RowMapper<Transaction> {
