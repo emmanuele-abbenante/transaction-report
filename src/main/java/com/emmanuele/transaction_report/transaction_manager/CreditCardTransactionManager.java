@@ -52,6 +52,8 @@ public class CreditCardTransactionManager extends BaseTransactionManager {
 		transaction.setCounterpart(getCounterparty(description));
 		transaction.setValueDate(LocalDate.parse(row.getTd().get(0)
 				.getContent(), DATE_FORMATTER));
+		transaction.setTransactionDateTime(transaction.getValueDate()
+				.atStartOfDay());
 		transaction.setReason(DEFAULT_REASON);
 		transaction.setCurrency(EUR_CURRENCY);
 		final String currencyAmount = row.getTd().get(4).getContent()
