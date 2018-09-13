@@ -34,7 +34,7 @@ public class CreditCardTransactionManager extends BaseTransactionManager {
 				final String description = row.getTd().get(2).getContent();
 				log.info(description);
 				if (DESCRIPTION_HEADER.equals(description)
-						|| StringUtils.isEmpty(description)) {
+						|| StringUtils.isEmpty(description.trim())) {
 					continue;
 				}
 				transactions.add(buildTransaction(row));
@@ -63,7 +63,7 @@ public class CreditCardTransactionManager extends BaseTransactionManager {
 	}
 
 	private static String getCounterparty(final String description) {
-		String counterparty = "";
+		String counterparty = description;
 		for (final Pattern pattern : CounterpartyPatternCache.getInstance()
 				.getPatterns()) {
 			final Matcher matcher = pattern.matcher(description);
