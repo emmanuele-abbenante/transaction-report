@@ -20,8 +20,12 @@ public class CurrentAccountTransactionDescriptionParser {
 			.compile("Operazione VPAY del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) \\/ Importo in Euro=(?<euramount>.*)[ \t\n]*presso (?<counterpart>.*) - Transazione C-less.*");
 	private static final Pattern VPAY_CONTACTLESS_FOREIGN_OPERATION = Pattern
 			.compile("Operazione VPAY del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) \\/ Importo in Euro=(?<euramount>.*)[ \t\n]*presso (?<counterpart>.*)\\.Tasso di cambio (?<foreignCurrency>.*)/EUR=(?<exchangeRate>.*) - Transazione C-less.*");
+	private static final Pattern PAGO_BANCOMAT_OPERATION = Pattern
+			.compile("Operazione PagoBancomat eseguita con carta (?<cardnumber>.*) il (?<date>.*) alle ora (?<time>.*) di Abi acquirer presso (?<counterpart>.*)");
 	private static final Pattern WITHDRAWAL_OPERATION = Pattern
 			.compile("Prelievo carta del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) di Abi Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) / Importo in[ \t\n]*Euro=(?<euramount>.*) presso (?<counterpart>.*)");
+	private static final Pattern BANCOMAT_WITHDRAWAL_OPERATION = Pattern
+			.compile("Prelievo Bancomat con carta (?<cardnumber>.*) il (?<date>.*) alle ore (?<time>.*) su sportello .* della (?<counterpart>.*) presso.*");
 	private static final Pattern FOREIGN_WITHDRAWAL_OPERATION = Pattern
 			.compile("Prelievo carta del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) di Abi Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) / Importo in[ \t\n]*Euro=(?<euramount>.*) presso (?<counterpart>.*)\\.Tasso di cambio (?<foreignCurrency>.*)/EUR=(?<exchangeRate>.*)");
 	private static final Pattern CREDIT_CARD_FEE_OPERATION = Pattern
@@ -48,6 +52,8 @@ public class CurrentAccountTransactionDescriptionParser {
 			.compile("Imposta di Bollo.*");
 	private static final Pattern PREPAID_CARD_FEE_OPERATION = Pattern
 			.compile("Commissione per ricarica carta prepagata MasterCard ING Direct");
+	private static final Pattern CANCELLATION_OPERATION = Pattern
+			.compile("STORNO SCRITTURA");
 
 	private CurrentAccountTransactionDescriptionParser() {
 	}
@@ -68,6 +74,10 @@ public class CurrentAccountTransactionDescriptionParser {
 		if (matcher.matches()) {
 			return parseVPayOperationDescription(matcher);
 		}
+		matcher = PAGO_BANCOMAT_OPERATION.matcher(cleanedDescriptionStr);
+		if (matcher.matches()) {
+			return parseBancomatOperationDescription(matcher);
+		}
 		matcher = FOREIGN_WITHDRAWAL_OPERATION.matcher(cleanedDescriptionStr);
 		if (matcher.matches()) {
 			return parseVPayForeignOperationDescription(matcher);
@@ -76,9 +86,13 @@ public class CurrentAccountTransactionDescriptionParser {
 		if (matcher.matches()) {
 			return parseVPayOperationDescription(matcher);
 		}
+		matcher = BANCOMAT_WITHDRAWAL_OPERATION.matcher(cleanedDescriptionStr);
+		if (matcher.matches()) {
+			return parseBancomatOperationDescription(matcher);
+		}
 		matcher = CREDIT_CARD_FEE_OPERATION.matcher(cleanedDescriptionStr);
 		if (matcher.matches()) {
-			return parseGenericDescription(matcher);
+			return parseGenericDescription();
 		}
 		matcher = INCOMING_MONEY_TRANSFER_OPERATION
 				.matcher(cleanedDescriptionStr);
@@ -102,7 +116,7 @@ public class CurrentAccountTransactionDescriptionParser {
 		}
 		matcher = CREDIT_CARD_CHARGE_OPERATION.matcher(cleanedDescriptionStr);
 		if (matcher.matches()) {
-			return parseGenericDescription(matcher);
+			return parseGenericDescription();
 		}
 		matcher = PAYMENT_OPERATION.matcher(cleanedDescriptionStr);
 		if (matcher.matches()) {
@@ -114,19 +128,23 @@ public class CurrentAccountTransactionDescriptionParser {
 		}
 		matcher = PREPAID_CARD_CHARGE_OPERATION.matcher(cleanedDescriptionStr);
 		if (matcher.matches()) {
-			return parseGenericDescription(matcher);
+			return parseGenericDescription();
 		}
 		matcher = PHONE_CHARGE_OPERATION.matcher(cleanedDescriptionStr);
 		if (matcher.matches()) {
-			return parseGenericDescription(matcher);
+			return parseGenericDescription();
 		}
 		matcher = STAMP_DUTY_OPERATION.matcher(cleanedDescriptionStr);
 		if (matcher.matches()) {
-			return parseGenericDescription(matcher);
+			return parseGenericDescription();
 		}
 		matcher = PREPAID_CARD_FEE_OPERATION.matcher(cleanedDescriptionStr);
 		if (matcher.matches()) {
-			return parseGenericDescription(matcher);
+			return parseGenericDescription();
+		}
+		matcher = CANCELLATION_OPERATION.matcher(cleanedDescriptionStr);
+		if (matcher.matches()) {
+			return parseGenericDescription();
 		}
 		throw new IllegalArgumentException("Unknown description: "
 				+ description);
@@ -165,6 +183,18 @@ public class CurrentAccountTransactionDescriptionParser {
 		return transaction;
 	}
 
+	private static Transaction parseBancomatOperationDescription(
+			final Matcher matcher) {
+		final Transaction transaction = new Transaction();
+		final String dateTimeStr = matcher.group("date") + " "
+				+ matcher.group("time");
+		transaction.setTransactionDateTime(LocalDateTime.parse(dateTimeStr,
+				DATE_TIME_FORMATTER));
+		transaction.setCardNumber(matcher.group("cardnumber"));
+		transaction.setCounterpart(matcher.group("counterpart"));
+		return transaction;
+	}
+
 	private static Transaction parsePaymentOperationDescription(
 			final Matcher matcher) {
 		final Transaction transaction = new Transaction();
@@ -181,9 +211,8 @@ public class CurrentAccountTransactionDescriptionParser {
 		return transaction;
 	}
 
-	private static Transaction parseGenericDescription(final Matcher matcher) {
-		final Transaction transaction = new Transaction();
-		return transaction;
+	private static Transaction parseGenericDescription() {
+		return new Transaction();
 	}
 
 }

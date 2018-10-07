@@ -54,7 +54,6 @@ public class CurrentAccountTransactionManager extends BaseTransactionManager {
 		final String currencyAmount = currencyAndAmount.substring(3,
 				currencyAndAmount.length());
 		transaction.setCurrencyAmount(Double.valueOf(currencyAmount));
-		log.info(transaction.toString());
 		return transaction;
 	}
 
