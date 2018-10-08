@@ -54,6 +54,8 @@ public class CurrentAccountTransactionDescriptionParser {
 			.compile("Commissione per ricarica carta prepagata MasterCard ING Direct");
 	private static final Pattern CANCELLATION_OPERATION = Pattern
 			.compile("STORNO SCRITTURA");
+	private static final Pattern ALERT_FEE_OPERATION = Pattern
+			.compile("Addebito mensile alert");
 
 	private CurrentAccountTransactionDescriptionParser() {
 	}
@@ -143,6 +145,10 @@ public class CurrentAccountTransactionDescriptionParser {
 			return parseGenericDescription();
 		}
 		matcher = CANCELLATION_OPERATION.matcher(cleanedDescriptionStr);
+		if (matcher.matches()) {
+			return parseGenericDescription();
+		}
+		matcher = ALERT_FEE_OPERATION.matcher(cleanedDescriptionStr);
 		if (matcher.matches()) {
 			return parseGenericDescription();
 		}
