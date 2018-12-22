@@ -2,223 +2,103 @@ package com.emmanuele.transaction_report.transaction_manager;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.emmanuele.transaction_report.dao.CurrentAccountTransactionPatternDao;
+import com.emmanuele.transaction_report.model.CurrentAccountTransactionPattern;
 import com.emmanuele.transaction_report.model.Transaction;
 
 public class CurrentAccountTransactionDescriptionParser {
 
 	private static final String NOT_ALLOWED_CHARACTERS_REGEX = "[^a-zA-Z0-9\\/:=\\.\\-\\s,]";
+	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+	private static final String SEMICOLON_SEPARATOR = ";";
 
-	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter
-			.ofPattern("dd/MM/yyyy HH:mm");
-
-	private static final Pattern VPAY_OPERATION = Pattern
-			.compile("Operazione VPAY del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) \\/ Importo in Euro=(?<euramount>.*)[ \t\n]*presso (?<counterpart>.*)");
-	private static final Pattern VPAY_CONTACTLESS_OPERATION = Pattern
-			.compile("Operazione VPAY del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) \\/ Importo in Euro=(?<euramount>.*)[ \t\n]*presso (?<counterpart>.*) - Transazione C-less.*");
-	private static final Pattern VPAY_CONTACTLESS_FOREIGN_OPERATION = Pattern
-			.compile("Operazione VPAY del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) \\/ Importo in Euro=(?<euramount>.*)[ \t\n]*presso (?<counterpart>.*)\\.Tasso di cambio (?<foreignCurrency>.*)/EUR=(?<exchangeRate>.*) - Transazione C-less.*");
-	private static final Pattern PAGO_BANCOMAT_OPERATION = Pattern
-			.compile("Operazione PagoBancomat eseguita con carta (?<cardnumber>.*) il (?<date>.*) alle ora (?<time>.*) di Abi acquirer presso (?<counterpart>.*)");
-	private static final Pattern WITHDRAWAL_OPERATION = Pattern
-			.compile("Prelievo carta del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) di Abi Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) / Importo in[ \t\n]*Euro=(?<euramount>.*) presso (?<counterpart>.*)");
-	private static final Pattern BANCOMAT_WITHDRAWAL_OPERATION = Pattern
-			.compile("Prelievo Bancomat con carta (?<cardnumber>.*) il (?<date>.*) alle ore (?<time>.*) su sportello .* della (?<counterpart>.*) presso.*");
-	private static final Pattern FOREIGN_WITHDRAWAL_OPERATION = Pattern
-			.compile("Prelievo carta del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) di Abi Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) / Importo in[ \t\n]*Euro=(?<euramount>.*) presso (?<counterpart>.*)\\.Tasso di cambio (?<foreignCurrency>.*)/EUR=(?<exchangeRate>.*)");
-	private static final Pattern CREDIT_CARD_FEE_OPERATION = Pattern
-			.compile("Canone mensile Carta di Credito");
-	private static final Pattern INCOMING_MONEY_TRANSFER_OPERATION = Pattern
-			.compile("DA (?<counterpartiban>.*) Giroconto");
-	private static final Pattern INCOMING_MONEY_TRANSFER_OPERATION_2 = Pattern
-			.compile("DA (?<counterpartiban>.*) GIRO da .*");
-	private static final Pattern OUTGOING_MONEY_TRANSFER_OPERATION = Pattern
-			.compile("A (?<counterpartiban>.*) Giroconto.");
-	private static final Pattern OUTGOING_MONEY_TRANSFER_OPERATION_2 = Pattern
-			.compile("A (?<counterpartiban>.*) GIRO da CCA .*");
-	private static final Pattern CREDIT_CARD_CHARGE_OPERATION = Pattern
-			.compile(".* ADDEBITO CARTA CREDITO .* E\\/C AL .* COD\\.CLIENTE: .*");
-	private static final Pattern PAYMENT_OPERATION = Pattern
-			.compile("BONIFICO DA VOI DISPOSTO NOP .* A FAVORE DI (?<counterpart>.*) C. BENEF. (?<counterpartiban>.*) NOTE: (?<paymentreason>.*)");
-	private static final Pattern INCOMING_PAYMENT_OPERATION = Pattern
-			.compile("Bonifico N. .* BIC Ordinante .* Data Ordine Codifica Ordinante (?<counterpartiban>.*) Anagrafica Ordinante (?<counterpart>.*) Note: (?<paymentreason>.*)");
-	private static final Pattern PREPAID_CARD_CHARGE_OPERATION = Pattern
-			.compile("Ricarica carta prepagata MasterCard ING Direct");
-	private static final Pattern PHONE_CHARGE_OPERATION = Pattern
-			.compile("Operazione di ricarica telefonica .* del numero .* eseguita il .* alle ore .* con Id-transazione .*");
-	private static final Pattern STAMP_DUTY_OPERATION = Pattern
-			.compile("Imposta di Bollo.*");
-	private static final Pattern PREPAID_CARD_FEE_OPERATION = Pattern
-			.compile("Commissione per ricarica carta prepagata MasterCard ING Direct");
-	private static final Pattern CANCELLATION_OPERATION = Pattern
-			.compile("STORNO SCRITTURA");
-	private static final Pattern ALERT_FEE_OPERATION = Pattern
-			.compile("Addebito mensile alert");
+	private static final Map<Pattern, String[]> PATTERNS = new HashMap<>();
+	static {
+		final List<CurrentAccountTransactionPattern> patterns = CurrentAccountTransactionPatternDao.getInstance()
+				.selectAll();
+		for (final CurrentAccountTransactionPattern pattern : patterns) {
+			final String fields = pattern.getFields();
+			PATTERNS.put(Pattern.compile(pattern.getPattern()),
+					fields != null ? fields.split(SEMICOLON_SEPARATOR) : null);
+		}
+	}
 
 	private CurrentAccountTransactionDescriptionParser() {
 	}
 
 	public static Transaction parseDescription(final String description) {
-		final String cleanedDescriptionStr = description.replaceAll(
-				NOT_ALLOWED_CHARACTERS_REGEX, "");
-		Matcher matcher = VPAY_CONTACTLESS_FOREIGN_OPERATION
-				.matcher(cleanedDescriptionStr);
-		if (matcher.matches()) {
-			return parseVPayForeignOperationDescription(matcher);
-		}
-		matcher = VPAY_CONTACTLESS_OPERATION.matcher(cleanedDescriptionStr);
-		if (matcher.matches()) {
-			return parseVPayOperationDescription(matcher);
-		}
-		matcher = VPAY_OPERATION.matcher(cleanedDescriptionStr);
-		if (matcher.matches()) {
-			return parseVPayOperationDescription(matcher);
-		}
-		matcher = PAGO_BANCOMAT_OPERATION.matcher(cleanedDescriptionStr);
-		if (matcher.matches()) {
-			return parseBancomatOperationDescription(matcher);
-		}
-		matcher = FOREIGN_WITHDRAWAL_OPERATION.matcher(cleanedDescriptionStr);
-		if (matcher.matches()) {
-			return parseVPayForeignOperationDescription(matcher);
-		}
-		matcher = WITHDRAWAL_OPERATION.matcher(cleanedDescriptionStr);
-		if (matcher.matches()) {
-			return parseVPayOperationDescription(matcher);
-		}
-		matcher = BANCOMAT_WITHDRAWAL_OPERATION.matcher(cleanedDescriptionStr);
-		if (matcher.matches()) {
-			return parseBancomatOperationDescription(matcher);
-		}
-		matcher = CREDIT_CARD_FEE_OPERATION.matcher(cleanedDescriptionStr);
-		if (matcher.matches()) {
-			return parseGenericDescription();
-		}
-		matcher = INCOMING_MONEY_TRANSFER_OPERATION
-				.matcher(cleanedDescriptionStr);
-		if (matcher.matches()) {
-			return parseMoneyTransferDescription(matcher);
-		}
-		matcher = INCOMING_MONEY_TRANSFER_OPERATION_2
-				.matcher(cleanedDescriptionStr);
-		if (matcher.matches()) {
-			return parseMoneyTransferDescription(matcher);
-		}
-		matcher = OUTGOING_MONEY_TRANSFER_OPERATION
-				.matcher(cleanedDescriptionStr);
-		if (matcher.matches()) {
-			return parseMoneyTransferDescription(matcher);
-		}
-		matcher = OUTGOING_MONEY_TRANSFER_OPERATION_2
-				.matcher(cleanedDescriptionStr);
-		if (matcher.matches()) {
-			return parseMoneyTransferDescription(matcher);
-		}
-		matcher = CREDIT_CARD_CHARGE_OPERATION.matcher(cleanedDescriptionStr);
-		if (matcher.matches()) {
-			return parseGenericDescription();
-		}
-		matcher = PAYMENT_OPERATION.matcher(cleanedDescriptionStr);
-		if (matcher.matches()) {
-			return parsePaymentOperationDescription(matcher);
-		}
-		matcher = INCOMING_PAYMENT_OPERATION.matcher(cleanedDescriptionStr);
-		if (matcher.matches()) {
-			return parsePaymentOperationDescription(matcher);
-		}
-		matcher = PREPAID_CARD_CHARGE_OPERATION.matcher(cleanedDescriptionStr);
-		if (matcher.matches()) {
-			return parseGenericDescription();
-		}
-		matcher = PHONE_CHARGE_OPERATION.matcher(cleanedDescriptionStr);
-		if (matcher.matches()) {
-			return parseGenericDescription();
-		}
-		matcher = STAMP_DUTY_OPERATION.matcher(cleanedDescriptionStr);
-		if (matcher.matches()) {
-			return parseGenericDescription();
-		}
-		matcher = PREPAID_CARD_FEE_OPERATION.matcher(cleanedDescriptionStr);
-		if (matcher.matches()) {
-			return parseGenericDescription();
-		}
-		matcher = CANCELLATION_OPERATION.matcher(cleanedDescriptionStr);
-		if (matcher.matches()) {
-			return parseGenericDescription();
-		}
-		matcher = ALERT_FEE_OPERATION.matcher(cleanedDescriptionStr);
-		if (matcher.matches()) {
-			return parseGenericDescription();
-		}
-		throw new IllegalArgumentException("Unknown description: "
-				+ description);
-	}
+		final String cleanedDescriptionStr = description.replaceAll(NOT_ALLOWED_CHARACTERS_REGEX, "");
 
-	private static Transaction parseVPayForeignOperationDescription(
-			final Matcher matcher) {
-		final Transaction transaction = parseVPayOperationDescription(matcher);
-		transaction.setForeignCurrency(matcher.group("foreignCurrency"));
-		final String exchangeRate = matcher.group("exchangeRate").replace(',',
-				'.');
-		if (exchangeRate != null) {
-			transaction.setExchangeRate(Double.valueOf(exchangeRate));
+		String[] fields = null;
+		Matcher matcher = null;
+		for (final Entry<Pattern, String[]> entry : PATTERNS.entrySet()) {
+			matcher = entry.getKey().matcher(cleanedDescriptionStr);
+			if (matcher.matches()) {
+				fields = entry.getValue();
+				break;
+			}
 		}
-		return transaction;
-	}
 
-	private static Transaction parseVPayOperationDescription(
-			final Matcher matcher) {
+		if (matcher == null) {
+			throw new IllegalArgumentException("Unknown description: " + description);
+		}
+
 		final Transaction transaction = new Transaction();
-		final String dateTimeStr = matcher.group("date") + " "
-				+ matcher.group("time");
-		transaction.setTransactionDateTime(LocalDateTime.parse(dateTimeStr,
-				DATE_TIME_FORMATTER));
-		transaction.setCardNumber(matcher.group("cardnumber"));
-		transaction.setCurrency(matcher.group("currency"));
-		final String currencyAmount = matcher.group("currencyamount");
-		if (currencyAmount != null) {
-			transaction.setCurrencyAmount(Double.valueOf(currencyAmount));
+		if (fields != null) {
+			for (final String field : fields) {
+				switch (field) {
+				case "date":
+					final String dateTimeStr = matcher.group("date") + " " + matcher.group("time");
+					transaction.setTransactionDateTime(LocalDateTime.parse(dateTimeStr, DATE_TIME_FORMATTER));
+					break;
+				case "cardnumber":
+					transaction.setCardNumber(matcher.group("cardnumber"));
+					break;
+				case "currency":
+					transaction.setCurrency(matcher.group("currency"));
+					break;
+				case "currencyamount":
+					final String currencyAmount = matcher.group("currencyamount");
+					if (currencyAmount != null) {
+						transaction.setCurrencyAmount(Double.valueOf(currencyAmount));
+					}
+					break;
+				case "euramount":
+					final String eurAmount = matcher.group("euramount");
+					if (eurAmount != null) {
+						transaction.setEurAmount(Double.valueOf(eurAmount));
+					}
+					break;
+				case "counterpart":
+					transaction.setCounterpart(matcher.group("counterpart"));
+					break;
+				case "foreignCurrency":
+					transaction.setForeignCurrency(matcher.group("foreignCurrency"));
+					break;
+				case "exchangeRate":
+					final String exchangeRate = matcher.group("exchangeRate").replace(',', '.');
+					if (exchangeRate != null) {
+						transaction.setExchangeRate(Double.valueOf(exchangeRate));
+					}
+					break;
+				case "counterpartiban":
+					transaction.setCounterpartIban(matcher.group("counterpartiban"));
+					break;
+				case "paymentreason":
+					transaction.setPaymentReason(matcher.group("paymentreason"));
+					break;
+				default:
+				}
+			}
 		}
-		final String eurAmount = matcher.group("euramount");
-		if (eurAmount != null) {
-			transaction.setEurAmount(Double.valueOf(eurAmount));
-		}
-		transaction.setCounterpart(matcher.group("counterpart"));
 		return transaction;
-	}
-
-	private static Transaction parseBancomatOperationDescription(
-			final Matcher matcher) {
-		final Transaction transaction = new Transaction();
-		final String dateTimeStr = matcher.group("date") + " "
-				+ matcher.group("time");
-		transaction.setTransactionDateTime(LocalDateTime.parse(dateTimeStr,
-				DATE_TIME_FORMATTER));
-		transaction.setCardNumber(matcher.group("cardnumber"));
-		transaction.setCounterpart(matcher.group("counterpart"));
-		return transaction;
-	}
-
-	private static Transaction parsePaymentOperationDescription(
-			final Matcher matcher) {
-		final Transaction transaction = new Transaction();
-		transaction.setCounterpart(matcher.group("counterpart"));
-		transaction.setCounterpartIban(matcher.group("counterpartiban"));
-		transaction.setPaymentReason(matcher.group("paymentreason"));
-		return transaction;
-	}
-
-	private static Transaction parseMoneyTransferDescription(
-			final Matcher matcher) {
-		final Transaction transaction = new Transaction();
-		transaction.setCounterpartIban(matcher.group("counterpartiban"));
-		return transaction;
-	}
-
-	private static Transaction parseGenericDescription() {
-		return new Transaction();
 	}
 
 }

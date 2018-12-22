@@ -275,7 +275,11 @@ INSERT INTO COUNTERPARTIES (NAME, EXPENSE_KIND) VALUES ('FARMACIA CANNATA SNC', 
 INSERT INTO COUNTERPARTIES (NAME, EXPENSE_KIND) VALUES ('LA PIANA', 'Spesa');
 INSERT INTO COUNTERPARTIES (NAME, EXPENSE_KIND) VALUES ('LIDL 9724', 'Spesa');
 INSERT INTO COUNTERPARTIES (NAME, EXPENSE_KIND) VALUES ('WOODSTOCK', 'Cene/aperitivi/etc');
-
+INSERT INTO COUNTERPARTIES (NAME, EXPENSE_KIND) VALUES ('ABBENANTE EMMANUELE', '');
+INSERT INTO COUNTERPARTIES (NAME, EXPENSE_KIND) VALUES ('Emmanuele Abbenante', '');
+INSERT INTO COUNTERPARTIES (NAME, EXPENSE_KIND) VALUES ('GGG S.R.L.', '');
+INSERT INTO COUNTERPARTIES (NAME, EXPENSE_KIND) VALUES ('18617518', '');
+INSERT INTO COUNTERPARTIES (NAME, EXPENSE_KIND) VALUES ('GENERAL SERVICE  SECU VIALE ROMOLO 6', '');
 
 CREATE TABLE COUNTERPARTIES_PATTERNS (
   PATTERN VARCHAR(100),
@@ -328,3 +332,220 @@ INSERT INTO COUNTERPARTIES_PATTERNS (PATTERN, NAME) VALUES ('WIND.IT.*','WIND.IT
 INSERT INTO COUNTERPARTIES_PATTERNS (PATTERN, NAME) VALUES ('WWW.JUSTEAT.IT.*','WWW.JUSTEAT.IT');
 INSERT INTO COUNTERPARTIES_PATTERNS (PATTERN, NAME) VALUES ('WWW.MIMOTO.IT.*','WWW.MIMOTO.IT');
 INSERT INTO COUNTERPARTIES_PATTERNS (PATTERN, NAME) VALUES ('WWW.MOBIKE.COM.*','WWW.MOBIKE.COM');
+
+CREATE TABLE CURR_ACC_TRANS_PATTERNS (
+  PATTERN VARCHAR(500),
+  FIELDS VARCHAR(200)
+)
+
+INSERT INTO CURR_ACC_TRANS_PATTERNS
+(
+  PATTERN,
+  FIELDS
+)
+VALUES
+(
+  'Operazione VPAY del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) \\/ Importo in Euro=(?<euramount>.*)[ \t\n]*presso (?<counterpart>.*)',
+  'date;time;cardnumber;currency;currencyamount;euramount;counterpart'
+);
+INSERT INTO CURR_ACC_TRANS_PATTERNS
+(
+  PATTERN,
+  FIELDS
+)
+VALUES
+(
+  'Operazione VPAY del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) \\/ Importo in Euro=(?<euramount>.*)[ \t\n]*presso (?<counterpart>.*) - Transazione C-less.*',
+  'date;time;cardnumber;currency;currencyamount;euramount;counterpart'
+);
+INSERT INTO CURR_ACC_TRANS_PATTERNS
+(
+  PATTERN,
+  FIELDS
+)
+VALUES
+(
+  'Operazione VPAY del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) \\/ Importo in Euro=(?<euramount>.*)[ \t\n]*presso (?<counterpart>.*)\\.Tasso di cambio (?<foreignCurrency>.*)/EUR=(?<exchangeRate>.*) - Transazione C-less.*',
+  'date;time;cardnumber;currency;currencyamount;euramount;counterpart;foreignCurrency;exchangeRate'
+);
+INSERT INTO CURR_ACC_TRANS_PATTERNS
+(
+  PATTERN,
+  FIELDS
+)
+VALUES
+(
+  'Operazione PagoBancomat eseguita con carta (?<cardnumber>.*) il (?<date>.*) alle ora (?<time>.*) di Abi acquirer presso (?<counterpart>.*)',
+  'cardnumber;date;time;counterpart'
+);
+INSERT INTO CURR_ACC_TRANS_PATTERNS
+(
+  PATTERN,
+  FIELDS
+)
+VALUES
+(
+  'Prelievo carta del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) di Abi Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) / Importo in[ \t\n]*Euro=(?<euramount>.*) presso (?<counterpart>.*)',
+  'date;time;cardnumber;currency;currencyamount;euramount;counterpart'
+);
+INSERT INTO CURR_ACC_TRANS_PATTERNS
+(
+  PATTERN,
+  FIELDS
+)
+VALUES
+(
+  'Prelievo Bancomat con carta (?<cardnumber>.*) il (?<date>.*) alle ore (?<time>.*) su sportello .* della (?<counterpart>.*) presso.*',
+  'cardnumber;date;time;counterpart'
+);
+INSERT INTO CURR_ACC_TRANS_PATTERNS
+(
+  PATTERN,
+  FIELDS
+)
+VALUES
+(
+  'Prelievo carta del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) di Abi Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) / Importo in[ \t\n]*Euro=(?<euramount>.*) presso (?<counterpart>.*)\\.Tasso di cambio (?<foreignCurrency>.*)/EUR=(?<exchangeRate>.*)',
+  'date;time;cardnumber;currency;currencyamount;euramount;counterpart;foreignCurrency;exchangeRate'
+);
+INSERT INTO CURR_ACC_TRANS_PATTERNS
+(
+  PATTERN,
+  FIELDS
+)
+VALUES
+(
+  'Canone mensile Carta di Credito',
+  ''
+);
+INSERT INTO CURR_ACC_TRANS_PATTERNS
+(
+  PATTERN,
+  FIELDS
+)
+VALUES
+(
+  'DA (?<counterpartiban>.*) Giroconto',
+  'counterpartiban'
+);
+INSERT INTO CURR_ACC_TRANS_PATTERNS
+(
+  PATTERN,
+  FIELDS
+)
+VALUES
+(
+  'DA (?<counterpartiban>.*) GIRO da .*',
+  'counterpartiban'
+);
+INSERT INTO CURR_ACC_TRANS_PATTERNS
+(
+  PATTERN,
+  FIELDS
+)
+VALUES
+(
+  'A (?<counterpartiban>.*) Giroconto.',
+  'counterpartiban'
+);
+INSERT INTO CURR_ACC_TRANS_PATTERNS
+(
+  PATTERN,
+  FIELDS
+)
+VALUES
+(
+  'A (?<counterpartiban>.*) GIRO da CCA .*',
+  'counterpartiban'
+);
+INSERT INTO CURR_ACC_TRANS_PATTERNS
+(
+  PATTERN,
+  FIELDS
+)
+VALUES
+(
+  '.* ADDEBITO CARTA CREDITO .* E\\/C AL .* COD\\.CLIENTE: .*',
+  NULL
+);
+INSERT INTO CURR_ACC_TRANS_PATTERNS
+(
+  PATTERN,
+  FIELDS
+)
+VALUES
+(
+  'BONIFICO DA VOI DISPOSTO NOP .* A FAVORE DI (?<counterpart>.*) C. BENEF. (?<counterpartiban>.*) NOTE: (?<paymentreason>.*)',
+  'counterpart;counterpartiban;paymentreason'
+);
+INSERT INTO CURR_ACC_TRANS_PATTERNS
+(
+  PATTERN,
+  FIELDS
+)
+VALUES
+(
+  'Bonifico N. .* BIC Ordinante .* Data Ordine Codifica Ordinante (?<counterpartiban>.*) Anagrafica Ordinante (?<counterpart>.*) Note: (?<paymentreason>.*)',
+  'counterpartiban;counterpart;paymentreason'
+);
+INSERT INTO CURR_ACC_TRANS_PATTERNS
+(
+  PATTERN,
+  FIELDS
+)
+VALUES
+(
+  'Ricarica carta prepagata MasterCard ING Direct',
+  NULL
+);
+INSERT INTO CURR_ACC_TRANS_PATTERNS
+(
+  PATTERN,
+  FIELDS
+)
+VALUES
+(
+  'Operazione di ricarica telefonica .* del numero .* eseguita il .* alle ore .* con Id-transazione .*',
+  NULL
+);
+INSERT INTO CURR_ACC_TRANS_PATTERNS
+(
+  PATTERN,
+  FIELDS
+)
+VALUES
+(
+  'Imposta di Bollo.*',
+  NULL
+);
+INSERT INTO CURR_ACC_TRANS_PATTERNS
+(
+  PATTERN,
+  FIELDS
+)
+VALUES
+(
+  'Commissione per ricarica carta prepagata MasterCard ING Direct',
+  NULL
+);
+INSERT INTO CURR_ACC_TRANS_PATTERNS
+(
+  PATTERN,
+  FIELDS
+)
+VALUES
+(
+  'STORNO SCRITTURA',
+  NULL
+);
+INSERT INTO CURR_ACC_TRANS_PATTERNS
+(
+  PATTERN,
+  FIELDS
+)
+VALUES
+(
+  'Addebito mensile alert',
+  NULL
+);
+

@@ -11,6 +11,7 @@ import javax.xml.bind.JAXBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.emmanuele.transaction_report.dao.CurrentAccountTransactionPatternDao;
 import com.emmanuele.transaction_report.dao.DbConf;
 import com.emmanuele.transaction_report.dao.TransactionDao;
 import com.emmanuele.transaction_report.dao.TransactionReportDataSource;
@@ -31,8 +32,7 @@ public class App {
 	public static JAXBContext JAXB_CONTEXT = null;
 	static {
 		try {
-			JAXB_CONTEXT = JAXBContext
-					.newInstance("com.emmanuele.transaction_report.bindings");
+			JAXB_CONTEXT = JAXBContext.newInstance("com.emmanuele.transaction_report.bindings");
 		} catch (JAXBException e) {
 			log.error("Error while initializing logger", e);
 		}
@@ -40,8 +40,7 @@ public class App {
 
 	public static void main(final String[] args) {
 		if (args.length != 2) {
-			System.err
-					.println("Usage: transaction-report.jar <transactions xml> <transactions source>");
+			System.err.println("Usage: transaction-report.jar <transactions xml> <transactions source>");
 			return;
 		}
 		try {
@@ -51,11 +50,9 @@ public class App {
 			final String transactionsSource = args[1];
 			List<Transaction> transactions = new ArrayList<Transaction>();
 			if ("CURRENT_ACCOUNT".equals(transactionsSource)) {
-				transactions = CurrentAccountTransactionManager
-						.buildTransactions(getFileContent(filePath));
+				transactions = CurrentAccountTransactionManager.buildTransactions(getFileContent(filePath));
 			} else if ("CREDIT_CARD".equals(transactionsSource)) {
-				transactions = CreditCardTransactionManager
-						.buildTransactions(getFileContent(filePath));
+				transactions = CreditCardTransactionManager.buildTransactions(getFileContent(filePath));
 			}
 			TransactionDao.getInstance().create(transactions);
 		} catch (final Exception e) {
@@ -64,20 +61,17 @@ public class App {
 	}
 
 	private static void initDataSource() throws Exception {
-		final Properties properties = FileUtils.readProperties(App.class,
-				CONFIG_PROPERTIES_FILE);
+		final Properties properties = FileUtils.readProperties(App.class, CONFIG_PROPERTIES_FILE);
 		DbConf.init(properties);
-		final TransactionReportDataSource dataSource = TransactionReportDataSource
-				.getInstance();
+		final TransactionReportDataSource dataSource = TransactionReportDataSource.getInstance();
 		dataSource.init(DbConf.getInstance());
 		TransactionDao.getInstance().init(dataSource.getDataSource());
+		CurrentAccountTransactionPatternDao.getInstance().init(dataSource.getDataSource());
 		CounterpartyPatternCache.getInstance().init(dataSource.getDataSource());
 	}
 
-	private static String getFileContent(final String filePath)
-			throws IOException {
-		return FileUtils.readFile(filePath).replace('\t', ' ')
-				.replace("   ", " ");
+	private static String getFileContent(final String filePath) throws IOException {
+		return FileUtils.readFile(filePath).replace('\t', ' ').replace("   ", " ");
 	}
 
 }
