@@ -345,7 +345,7 @@ INSERT INTO CURR_ACC_TRANS_PATTERNS
 )
 VALUES
 (
-  'Operazione VPAY del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) \\/ Importo in Euro=(?<euramount>.*)[ \t\n]*presso (?<counterpart>.*)',
+  'Operazione VPAY del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) \/ Importo in Euro=(?<euramount>.*)[ \t\n]*presso (?<counterpart>.*)',
   'date;time;cardnumber;currency;currencyamount;euramount;counterpart'
 );
 INSERT INTO CURR_ACC_TRANS_PATTERNS
@@ -355,7 +355,7 @@ INSERT INTO CURR_ACC_TRANS_PATTERNS
 )
 VALUES
 (
-  'Operazione VPAY del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) \\/ Importo in Euro=(?<euramount>.*)[ \t\n]*presso (?<counterpart>.*) - Transazione C-less.*',
+  'Operazione VPAY del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) \/ Importo in Euro=(?<euramount>.*)[ \t\n]*presso (?<counterpart>.*) - Transazione C-less.*',
   'date;time;cardnumber;currency;currencyamount;euramount;counterpart'
 );
 INSERT INTO CURR_ACC_TRANS_PATTERNS
@@ -365,7 +365,7 @@ INSERT INTO CURR_ACC_TRANS_PATTERNS
 )
 VALUES
 (
-  'Operazione VPAY del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) \\/ Importo in Euro=(?<euramount>.*)[ \t\n]*presso (?<counterpart>.*)\\.Tasso di cambio (?<foreignCurrency>.*)/EUR=(?<exchangeRate>.*) - Transazione C-less.*',
+  'Operazione VPAY del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) \/ Importo in Euro=(?<euramount>.*)[ \t\n]*presso (?<counterpart>.*)\.Tasso di cambio (?<foreignCurrency>.*)/EUR=(?<exchangeRate>.*) - Transazione C-less.*',
   'date;time;cardnumber;currency;currencyamount;euramount;counterpart;foreignCurrency;exchangeRate'
 );
 INSERT INTO CURR_ACC_TRANS_PATTERNS
@@ -405,7 +405,7 @@ INSERT INTO CURR_ACC_TRANS_PATTERNS
 )
 VALUES
 (
-  'Prelievo carta del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) di Abi Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) / Importo in[ \t\n]*Euro=(?<euramount>.*) presso (?<counterpart>.*)\\.Tasso di cambio (?<foreignCurrency>.*)/EUR=(?<exchangeRate>.*)',
+  'Prelievo carta del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) di Abi Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*) / Importo in[ \t\n]*Euro=(?<euramount>.*) presso (?<counterpart>.*)\.Tasso di cambio (?<foreignCurrency>.*)/EUR=(?<exchangeRate>.*)',
   'date;time;cardnumber;currency;currencyamount;euramount;counterpart;foreignCurrency;exchangeRate'
 );
 INSERT INTO CURR_ACC_TRANS_PATTERNS
@@ -445,7 +445,7 @@ INSERT INTO CURR_ACC_TRANS_PATTERNS
 )
 VALUES
 (
-  'A (?<counterpartiban>.*) Giroconto.',
+  'A (?<counterpartiban>.*) [gG]iroconto.?',
   'counterpartiban'
 );
 INSERT INTO CURR_ACC_TRANS_PATTERNS
@@ -465,7 +465,7 @@ INSERT INTO CURR_ACC_TRANS_PATTERNS
 )
 VALUES
 (
-  '.* ADDEBITO CARTA CREDITO .* E\\/C AL .* COD\\.CLIENTE: .*',
+  '.* ADDEBITO CARTA CREDITO .* E\/C AL .* COD\.CLIENTE: .*',
   NULL
 );
 INSERT INTO CURR_ACC_TRANS_PATTERNS

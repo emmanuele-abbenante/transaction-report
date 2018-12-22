@@ -38,15 +38,17 @@ public class CurrentAccountTransactionDescriptionParser {
 
 		String[] fields = null;
 		Matcher matcher = null;
+		boolean matchFound = false;
 		for (final Entry<Pattern, String[]> entry : PATTERNS.entrySet()) {
 			matcher = entry.getKey().matcher(cleanedDescriptionStr);
 			if (matcher.matches()) {
+				matchFound = true;
 				fields = entry.getValue();
 				break;
 			}
 		}
 
-		if (matcher == null) {
+		if (!matchFound) {
 			throw new IllegalArgumentException("Unknown description: " + description);
 		}
 
