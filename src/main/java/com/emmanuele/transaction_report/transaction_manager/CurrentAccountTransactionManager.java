@@ -24,16 +24,12 @@ public class CurrentAccountTransactionManager extends BaseTransactionManager {
 		final Table table = parseXml(fileContent);
 		final List<Transaction> transactions = new ArrayList<>();
 		for (final Tr row : table.getTr()) {
-			try {
-				final String description = row.getTd().get(3).getContent();
-				log.info(description);
-				if (DESCRIPTION_HEADER.equals(description)) {
-					continue;
-				}
-				transactions.add(buildTransaction(row));
-			} catch (Exception e) {
-				log.error("", e);
+			final String description = row.getTd().get(3).getContent();
+			log.info(description);
+			if (DESCRIPTION_HEADER.equals(description)) {
+				continue;
 			}
+			transactions.add(buildTransaction(row));
 		}
 		return transactions;
 	}

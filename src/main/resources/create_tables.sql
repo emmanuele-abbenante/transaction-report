@@ -548,4 +548,23 @@ VALUES
   'Addebito mensile alert',
   NULL
 );
-
+INSERT INTO CURR_ACC_TRANS_PATTERNS
+(
+  PATTERN,
+  FIELDS
+)
+VALUES
+(
+  'Estratto conto carta di credito al .*',
+  NULL
+);
+INSERT INTO CURR_ACC_TRANS_PATTERNS
+(
+  PATTERN,
+  FIELDS
+)
+VALUES
+(
+  'Commissione prelievo contante in Italia e in Europa. Operazione del (?<date>.*) alle ore (?<time>.*) con Carta[ \t\n]*(?<cardnumber>.*) di ABI Div=(?<currency>.*) Importo in divisa=(?<currencyamount>.*)\/Importo in euro=(?<euramount>.*)[ \t\n]*presso (?<counterpart>.*)',
+  'date;time;cardnumber;currency;currencyamount;euramount;counterpart'
+);
