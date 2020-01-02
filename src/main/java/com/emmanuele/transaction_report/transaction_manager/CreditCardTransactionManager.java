@@ -31,12 +31,13 @@ public class CreditCardTransactionManager extends BaseTransactionManager {
 		final List<Transaction> transactions = new ArrayList<>();
 		for (final Tr row : table.getTr()) {
 			final String description = row.getTd().get(2).getContent();
-			log.info(description);
 			if (DESCRIPTION_HEADER.equals(description)
 					|| StringUtils.isEmpty(description.trim())) {
 				continue;
 			}
-			transactions.add(buildTransaction(row));
+			final Transaction transaction = buildTransaction(row);
+			log.info(transaction.toString());
+			transactions.add(transaction);
 		}
 		return transactions;
 	}

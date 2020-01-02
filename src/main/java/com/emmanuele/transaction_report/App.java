@@ -23,6 +23,9 @@ import com.emmanuele.transaction_report.utils.FileUtils;
 
 public class App {
 
+	private static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + 
+			"<!DOCTYPE table [<!ENTITY euro \"EUR\">]>";
+	
 	private static final String CONFIG_PROPERTIES_FILE = "config.properties";
 
 	private static final Logger log = LoggerFactory.getLogger(App.class);
@@ -45,14 +48,16 @@ public class App {
 		}
 		try {
 			initDataSource();
+			System.setProperty("javax.xml.accessExternalDTD", "all");
 
 			final String filePath = args[0];
 			final String transactionsSource = args[1];
 			List<Transaction> transactions = new ArrayList<Transaction>();
+			final String xmlContent = clearXmlContent(FileUtils.readFile(filePath));
 			if ("CURRENT_ACCOUNT".equals(transactionsSource)) {
-				transactions = CurrentAccountTransactionManager.buildTransactions(getFileContent(filePath));
+				transactions = CurrentAccountTransactionManager.buildTransactions(xmlContent);
 			} else if ("CREDIT_CARD".equals(transactionsSource)) {
-				transactions = CreditCardTransactionManager.buildTransactions(getFileContent(filePath));
+				transactions = CreditCardTransactionManager.buildTransactions(xmlContent);
 			}
 			TransactionDao.getInstance().create(transactions);
 		} catch (final Exception e) {
@@ -70,8 +75,9 @@ public class App {
 		CounterpartyPatternCache.getInstance().init(dataSource.getDataSource());
 	}
 
-	private static String getFileContent(final String filePath) throws IOException {
-		return FileUtils.readFile(filePath).replace('\t', ' ').replace("   ", " ");
+	private static String clearXmlContent(final String xmlContent) throws IOException {
+		return XML_HEADER + xmlContent.replace('\t', ' ').replace("   ", " ").replace("& ", "&amp; ")
+				.replaceAll("<style>.*</style>", "");
 	}
 
 }

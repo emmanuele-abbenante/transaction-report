@@ -15,7 +15,7 @@ import com.emmanuele.transaction_report.model.Transaction;
 
 public class CurrentAccountTransactionDescriptionParser {
 
-	private static final String NOT_ALLOWED_CHARACTERS_REGEX = "[^a-zA-Z0-9\\/:=\\.\\-\\s,]";
+	private static final String NOT_ALLOWED_CHARACTERS_REGEX = "[^a-zA-Z0-9\\/:=\\.\\-\\s,&]";
 	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 	private static final String SEMICOLON_SEPARATOR = ";";
 
