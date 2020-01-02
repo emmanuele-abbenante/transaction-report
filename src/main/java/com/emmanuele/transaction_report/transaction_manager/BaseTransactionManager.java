@@ -9,7 +9,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import com.emmanuele.transaction_report.App;
-import com.emmanuele.transaction_report.bindings.Table;
+import com.emmanuele.transaction_report.bindings.Body;
 
 public abstract class BaseTransactionManager {
 
@@ -18,10 +18,10 @@ public abstract class BaseTransactionManager {
 	protected static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter
 			.ofPattern("dd/MM/yyyy");
 
-	protected static Table parseXml(final String fileContent)
+	protected static Body parseXml(final String fileContent)
 			throws JAXBException, UnsupportedEncodingException {
 		final Unmarshaller u = App.JAXB_CONTEXT.createUnmarshaller();
-		return (Table) u.unmarshal(new ByteArrayInputStream(fileContent
+		return (Body) u.unmarshal(new ByteArrayInputStream(fileContent
 				.getBytes(StandardCharsets.UTF_8.name())));
 	}
 
