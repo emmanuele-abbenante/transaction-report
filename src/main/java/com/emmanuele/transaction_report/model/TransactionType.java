@@ -16,6 +16,13 @@
 
 package com.emmanuele.transaction_report.model;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
+import com.emmanuele.transaction_report.App;
+import com.emmanuele.transaction_report.utils.FileUtils;
+
 /**
  * Type of transaction, according to the OFX standard, version 2.2.
  */
@@ -26,8 +33,7 @@ public enum TransactionType {
 	/** Generic debit. */
 	DEBIT,
 	/**
-	 * Interest earned or paid.
-	 * Note: Depends on signage of amount.
+	 * Interest earned or paid. Note: Depends on signage of amount.
 	 */
 	INT,
 	/** Dividend. */
@@ -39,13 +45,11 @@ public enum TransactionType {
 	/** Deposit. */
 	DEP,
 	/**
-	 * ATM debit or credit. 
-	 * Note: Depends on signage of amount.
+	 * ATM debit or credit. Note: Depends on signage of amount.
 	 */
 	ATM,
 	/**
-	 * Point of sale debit or credit.
-	 * Note: Depends on signage of amount.
+	 * Point of sale debit or credit. Note: Depends on signage of amount.
 	 */
 	POS,
 	/** Transfer. */
@@ -63,11 +67,36 @@ public enum TransactionType {
 	/** Repeating payment/standing order. */
 	REPEATPMT,
 	/**
-	 * Only valid in <STMTTRNP>; indicates the amount is under a hold.
-	 * Note: Depends on signage of amount and account type.
+	 * Only valid in <STMTTRNP>; indicates the amount is under a hold. Note: Depends
+	 * on signage of amount and account type.
 	 */
 	HOLD,
 	/** Other. */
 	OTHER;
+
+	private static final String PROPERTIES_FILE = "transaction_types_mapping.properties";
+	private static final String PATTERNS_PROPERTY = "transaction_types_mapping";
+
+	private static final String PIPE_SEPARATOR = "\\|";
+	private static final String COLON_SEPARATOR = ":";
+
+	private static final Map<String, TransactionType> MAPPING = new HashMap<>();
+	static {
+		try {
+			final Properties properties = FileUtils.readExternalProperties(App.class, PROPERTIES_FILE);
+			for (final String entry : properties.getProperty(PATTERNS_PROPERTY).split(PIPE_SEPARATOR)) {
+				final String[] items = entry.split(COLON_SEPARATOR);
+				final String transactionType = items[0];
+				final String ofxTransactionType = items[1];
+				MAPPING.put(transactionType, TransactionType.valueOf(ofxTransactionType));
+			}
+		} catch (final Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static TransactionType getInstance(final String transactionType) {
+		return MAPPING.get(transactionType);
+	}
 
 }

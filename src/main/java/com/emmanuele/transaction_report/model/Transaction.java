@@ -138,7 +138,7 @@ public class Transaction {
 	}
 
 	public Element toOFX(Document doc) {
-		TransactionType transactionType = currencyAmount < 0 ? TransactionType.DEBIT : TransactionType.CREDIT;
+		TransactionType transactionType = TransactionType.getInstance(reason);
 
 		Element transactionNode = doc.createElement(OfxHelper.TAG_STATEMENT_TRANSACTION);
 		Element typeNode = doc.createElement(OfxHelper.TAG_TRANSACTION_TYPE);

@@ -47,7 +47,7 @@ public class CurrentAccountTransactionManager extends BaseTransactionManager {
 				.parseDescription(description);
 		transaction.setValueDate(LocalDate.parse(row.getTd().get(0)
 				.getContent(), DATE_FORMATTER));
-		transaction.setReason(reason);
+		transaction.setReason(reason != null ? reason.trim() : "");
 		transaction.setDescription(description);
 		final String currencyAndAmount = row.getTd().get(4).getContent().trim()
 				.replaceAll("\\.", "").replace(',', '.').replaceAll(" ", "");
