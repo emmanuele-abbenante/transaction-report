@@ -6,20 +6,14 @@ import java.util.List;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.emmanuele.transaction_report.converter.ofx.OfxAccountType;
 import com.emmanuele.transaction_report.converter.ofx.OfxHelper;
 
 public class Account {
 
-	/**
-	 * Accounts types which are used by the OFX standard
-	 */
-	public enum OfxAccountType {
-		CHECKING, SAVINGS, MONEYMRKT, CREDITLINE
-	}
-
 	private String iban;
 	private String currencyCode;
-	private AccountType accountType = AccountType.CASH;
+	private OfxAccountType ofxAccountType = OfxAccountType.CHECKING;
 	private List<Transaction> transactions = new ArrayList<>();
 
 	/**
@@ -51,17 +45,17 @@ public class Account {
 	}
 
 	/**
-	 * @return the accountType
+	 * @return the ofxAccountType
 	 */
-	public AccountType getAccountType() {
-		return accountType;
+	public OfxAccountType getOfxAccountType() {
+		return ofxAccountType;
 	}
 
 	/**
-	 * @param accountType the accountType to set
+	 * @param ofxAccountType the ofxAccountType to set
 	 */
-	public void setAccountType(AccountType accountType) {
-		this.accountType = accountType;
+	public void setOfxAccountType(OfxAccountType ofxAccountType) {
+		this.ofxAccountType = ofxAccountType;
 	}
 
 	/**
@@ -89,8 +83,7 @@ public class Account {
 		acctId.appendChild(doc.createTextNode(iban));
 
 		Element accttype = doc.createElement(OfxHelper.TAG_ACCOUNT_TYPE);
-		String ofxAccountType = convertToOfxAccountType(accountType).toString();
-		accttype.appendChild(doc.createTextNode(ofxAccountType));
+		accttype.appendChild(doc.createTextNode(ofxAccountType.toString()));
 
 		Element bankFrom = doc.createElement(OfxHelper.TAG_BANK_ACCOUNT_FROM);
 		bankFrom.appendChild(acctId);
@@ -113,34 +106,6 @@ public class Account {
 		statementTransactions.appendChild(bankTransactionsList);
 
 		parent.appendChild(statementTransactions);
-	}
-
-	public static OfxAccountType convertToOfxAccountType(AccountType accountType) {
-		switch (accountType) {
-		case CREDIT:
-		case LIABILITY:
-			return OfxAccountType.CREDITLINE;
-
-		case CASH:
-		case INCOME:
-		case EXPENSE:
-		case PAYABLE:
-		case RECEIVABLE:
-			return OfxAccountType.CHECKING;
-
-		case BANK:
-		case ASSET:
-			return OfxAccountType.SAVINGS;
-
-		case MUTUAL:
-		case STOCK:
-		case EQUITY:
-		case CURRENCY:
-			return OfxAccountType.MONEYMRKT;
-
-		default:
-			return OfxAccountType.CHECKING;
-		}
 	}
 
 }
