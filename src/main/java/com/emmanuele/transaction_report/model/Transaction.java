@@ -3,6 +3,11 @@ package com.emmanuele.transaction_report.model;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import com.emmanuele.transaction_report.converter.ofx.OfxHelper;
+
 public class Transaction {
 
 	private LocalDateTime transactionDateTime;
@@ -132,17 +137,40 @@ public class Transaction {
 		this.exchangeRate = exchangeRate;
 	}
 
+	public Element toOFX(Document doc) {
+		TransactionType transactionType = currencyAmount < 0 ? TransactionType.DEBIT : TransactionType.CREDIT;
+
+		Element transactionNode = doc.createElement(OfxHelper.TAG_STATEMENT_TRANSACTION);
+		Element typeNode = doc.createElement(OfxHelper.TAG_TRANSACTION_TYPE);
+		typeNode.appendChild(doc.createTextNode(transactionType.toString()));
+		transactionNode.appendChild(typeNode);
+
+		Element datePosted = doc.createElement(OfxHelper.TAG_DATE_POSTED);
+		datePosted.appendChild(doc.createTextNode(OfxHelper.DATE_FORMATTER.format(valueDate)));
+		transactionNode.appendChild(datePosted);
+
+		Element amount = doc.createElement(OfxHelper.TAG_TRANSACTION_AMOUNT);
+		amount.appendChild(doc.createTextNode(OfxHelper.AMOUNT_FORMATTER.format(currencyAmount)));
+		transactionNode.appendChild(amount);
+
+		Element name = doc.createElement(OfxHelper.TAG_NAME);
+		name.appendChild(doc.createTextNode(counterpart != null ? counterpart : " "));
+		transactionNode.appendChild(name);
+
+		Element memo = doc.createElement(OfxHelper.TAG_MEMO);
+		memo.appendChild(doc.createTextNode(description));
+		transactionNode.appendChild(memo);
+
+		return transactionNode;
+	}
+
 	@Override
 	public String toString() {
-		return "Transaction [transactionDateTime=" + transactionDateTime
-				+ ", valueDate=" + valueDate + ", reason=" + reason
-				+ ", description=" + description + ", currency=" + currency
-				+ ", currencyAmount=" + currencyAmount + ", cardNumber="
-				+ cardNumber + ", eurAmount=" + eurAmount + ", counterpart="
-				+ counterpart + ", atmName=" + atmName + ", counterpartIban="
-				+ counterpartIban + ", paymentReason=" + paymentReason
-				+ ", foreignCurrency=" + foreignCurrency + ", exchangeRate="
-				+ exchangeRate + "]";
+		return "Transaction [transactionDateTime=" + transactionDateTime + ", valueDate=" + valueDate + ", reason="
+				+ reason + ", description=" + description + ", currency=" + currency + ", currencyAmount="
+				+ currencyAmount + ", cardNumber=" + cardNumber + ", eurAmount=" + eurAmount + ", counterpart="
+				+ counterpart + ", atmName=" + atmName + ", counterpartIban=" + counterpartIban + ", paymentReason="
+				+ paymentReason + ", foreignCurrency=" + foreignCurrency + ", exchangeRate=" + exchangeRate + "]";
 	}
 
 }

@@ -79,7 +79,10 @@ public class CurrentAccountTransactionDescriptionParser {
 					}
 					break;
 				case "counterpart":
-					transaction.setCounterpart(matcher.group("counterpart"));
+					final String counterpart = matcher.group("counterpart");
+					if (counterpart != null) {
+						transaction.setCounterpart(counterpart.trim());
+					}
 					break;
 				case "foreignCurrency":
 					transaction.setForeignCurrency(matcher.group("foreignCurrency"));
