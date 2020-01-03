@@ -11,10 +11,12 @@ import javax.xml.bind.JAXBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.emmanuele.transaction_report.converter.ofx.OfxExporter;
 import com.emmanuele.transaction_report.dao.CurrentAccountTransactionPatternDao;
 import com.emmanuele.transaction_report.dao.DbConf;
 import com.emmanuele.transaction_report.dao.TransactionDao;
 import com.emmanuele.transaction_report.dao.TransactionReportDataSource;
+import com.emmanuele.transaction_report.model.Account;
 import com.emmanuele.transaction_report.model.Transaction;
 import com.emmanuele.transaction_report.transaction_manager.CounterpartyPatternCache;
 import com.emmanuele.transaction_report.transaction_manager.CreditCardTransactionManager;
@@ -43,16 +45,18 @@ public class App {
 	}
 
 	public static void main(final String[] args) {
-		if (args.length != 2) {
-			System.err.println("Usage: transaction-report.jar <transactions xml> <transactions source>");
+		if (args.length < 3) {
+			System.err.println(
+					"Usage: transaction-report.jar (--export-ofx|--store) <transactions xml> (CURRENT_ACCOUNT|CREDIT_CARD) [<account IBAN>]");
 			return;
 		}
 		try {
 			initDataSource();
 			System.setProperty("javax.xml.accessExternalDTD", "all");
 
-			final String filePath = args[0];
-			final String transactionsSource = args[1];
+			final String action = args[0];
+			final String filePath = args[1];
+			final String transactionsSource = args[2];
 			List<Transaction> transactions = new ArrayList<Transaction>();
 			final String xmlContent = clearXmlContent(FileUtils.readFile(filePath));
 			if ("CURRENT_ACCOUNT".equals(transactionsSource)) {
@@ -60,7 +64,16 @@ public class App {
 			} else if ("CREDIT_CARD".equals(transactionsSource)) {
 				transactions = CreditCardTransactionManager.buildTransactions(xmlContent);
 			}
-			TransactionDao.getInstance().create(transactions);
+			if ("--store".equals(action)) {
+				TransactionDao.getInstance().create(transactions);
+			} else if ("--convert-to-ofx".equals(action)) {
+				final Account account = new Account();
+				final String accountIban = args[3];
+				account.setIban(accountIban);
+				account.setTransactions(transactions);
+				final OfxExporter ofxExporter = new OfxExporter(account, true);
+				System.out.println(ofxExporter.generateOfxExport());
+			}
 		} catch (final Exception e) {
 			log.error("", e);
 		}

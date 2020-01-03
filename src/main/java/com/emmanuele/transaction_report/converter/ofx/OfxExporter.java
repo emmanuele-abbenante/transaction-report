@@ -19,6 +19,7 @@ package com.emmanuele.transaction_report.converter.ofx;
 
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -54,10 +55,21 @@ public class OfxExporter {
 	private boolean useXmlHeader;
 
 	/**
-	 * Builds an XML representation of the {@link Account}s and {@link Transaction}s
-	 * in the database
+	 * Builds an OFX representation of the input {@link Account}s and
+	 * {@link Transaction}s.
 	 */
 	public OfxExporter(List<Account> accounts, boolean useXmlHeader) {
+		this.accounts = accounts;
+		this.useXmlHeader = useXmlHeader;
+	}
+
+	/**
+	 * Builds an OFX representation of the input {@link Account} and
+	 * {@link Transaction}s.
+	 */
+	public OfxExporter(Account account, boolean useXmlHeader) {
+		final List<Account> accounts = new ArrayList<>();
+		accounts.add(account);
 		this.accounts = accounts;
 		this.useXmlHeader = useXmlHeader;
 	}
@@ -139,12 +151,4 @@ public class OfxExporter {
 		transformer.transform(source, result);
 	}
 
-	/**
-	 * Returns the MIME type for this exporter.
-	 * 
-	 * @return MIME type as string
-	 */
-	public String getExportMimeType() {
-		return "text/xml";
-	}
 }

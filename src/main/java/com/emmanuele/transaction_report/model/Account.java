@@ -12,7 +12,7 @@ import com.emmanuele.transaction_report.converter.ofx.OfxHelper;
 public class Account {
 
 	private String iban;
-	private String currencyCode;
+	private String currencyCode = "EUR";
 	private OfxAccountType ofxAccountType = OfxAccountType.CHECKING;
 	private List<Transaction> transactions = new ArrayList<>();
 

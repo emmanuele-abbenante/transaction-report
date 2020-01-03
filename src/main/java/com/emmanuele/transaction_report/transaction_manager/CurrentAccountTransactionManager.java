@@ -34,7 +34,7 @@ public class CurrentAccountTransactionManager extends BaseTransactionManager {
 				continue;
 			}
 			final Transaction transaction = buildTransaction(row);
-			log.info(transaction.toString());
+			log.debug(transaction.toString());
 			transactions.add(transaction);
 		}
 		return transactions;
