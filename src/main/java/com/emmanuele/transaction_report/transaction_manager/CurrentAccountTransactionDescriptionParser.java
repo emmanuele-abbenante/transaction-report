@@ -2,31 +2,45 @@ package com.emmanuele.transaction_report.transaction_manager;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.emmanuele.transaction_report.dao.CurrentAccountTransactionPatternDao;
-import com.emmanuele.transaction_report.model.CurrentAccountTransactionPattern;
+import com.emmanuele.transaction_report.App;
 import com.emmanuele.transaction_report.model.Transaction;
+import com.emmanuele.transaction_report.utils.FileUtils;
 
 public class CurrentAccountTransactionDescriptionParser {
 
+	private static final String PROPERTIES_FILE = "curr_acc_trans_desc_patterns.properties";
+	private static final String PATTERNS_PROPERTY = "curr_acc_trans_desc_patterns";
 	private static final String NOT_ALLOWED_CHARACTERS_REGEX = "[^a-zA-Z0-9\\/:=\\.\\-\\s,&]";
 	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-	private static final String SEMICOLON_SEPARATOR = ";";
 
-	private static final Map<Pattern, String[]> PATTERNS = new HashMap<>();
+	private static final String SEMICOLON_SEPARATOR = ";";
+	private static final String PIPE_SEPARATOR = "\\|";
+	private static final String HASH_SEPARATOR = "#";
+
+	// Using a LinkedHashMap because the insertion order is meaningful.
+	// The patterns are specified into the properties according to their priorities.
+	private static final Map<Pattern, String[]> PATTERNS = new LinkedHashMap<>();
 	static {
-		final List<CurrentAccountTransactionPattern> patterns = CurrentAccountTransactionPatternDao.getInstance()
-				.selectAll();
-		for (final CurrentAccountTransactionPattern pattern : patterns) {
-			final String fields = pattern.getFields();
-			PATTERNS.put(Pattern.compile(pattern.getPattern()),
-					fields != null ? fields.split(SEMICOLON_SEPARATOR) : null);
+		try {
+			final Properties properties = FileUtils.readExternalProperties(App.class, PROPERTIES_FILE);
+			for (final String entry : properties.getProperty(PATTERNS_PROPERTY).split(HASH_SEPARATOR)) {
+				final String[] items = entry.split(PIPE_SEPARATOR);
+				final String patternStr = items[0];
+				String fields = null;
+				if (items.length == 2) {
+					fields = items[1];
+				}
+				PATTERNS.put(Pattern.compile(patternStr), fields != null ? fields.split(SEMICOLON_SEPARATOR) : null);
+			}
+		} catch (final Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 
