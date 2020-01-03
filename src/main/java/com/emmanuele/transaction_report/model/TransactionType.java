@@ -17,28 +17,57 @@
 package com.emmanuele.transaction_report.model;
 
 /**
- * Type of transaction, a credit or a debit
- *
- * @author Ngewi Fet <ngewif@gmail.com>
- * @author Jesse Shieh <jesse.shieh.pub@gmail.com>
+ * Type of transaction, according to the OFX standard, version 2.2.
  */
 public enum TransactionType {
-    DEBIT, CREDIT;
 
-    private TransactionType opposite;
+	/** Generic credit. */
+	CREDIT,
+	/** Generic debit. */
+	DEBIT,
+	/**
+	 * Interest earned or paid.
+	 * Note: Depends on signage of amount.
+	 */
+	INT,
+	/** Dividend. */
+	DIV,
+	/** FI fee. */
+	FEE,
+	/** Service charge. */
+	SRVCHG,
+	/** Deposit. */
+	DEP,
+	/**
+	 * ATM debit or credit. 
+	 * Note: Depends on signage of amount.
+	 */
+	ATM,
+	/**
+	 * Point of sale debit or credit.
+	 * Note: Depends on signage of amount.
+	 */
+	POS,
+	/** Transfer. */
+	XFER,
+	/** Check. */
+	CHECK,
+	/** Electronic payment. */
+	PAYMENT,
+	/** Cash withdrawal. */
+	CASH,
+	/** Direct deposit. */
+	DIRECTDEP,
+	/** Merchant initiated debit. */
+	DIRECTDEBIT,
+	/** Repeating payment/standing order. */
+	REPEATPMT,
+	/**
+	 * Only valid in <STMTTRNP>; indicates the amount is under a hold.
+	 * Note: Depends on signage of amount and account type.
+	 */
+	HOLD,
+	/** Other. */
+	OTHER;
 
-    static {
-        DEBIT.opposite = CREDIT;
-        CREDIT.opposite = DEBIT;
-    }
-
-    /**
-     * Inverts the transaction type.
-     * <p>{@link TransactionType#CREDIT} becomes {@link TransactionType#DEBIT} and vice versa</p>
-     * @return Inverted transaction type
-     */
-    public TransactionType invert() {
-        return opposite;
-    }
 }
-
