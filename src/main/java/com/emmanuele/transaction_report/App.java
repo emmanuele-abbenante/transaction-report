@@ -47,13 +47,10 @@ public class App {
 	public static void main(final String[] args) {
 		if (args.length < 3) {
 			System.err.println(
-					"Usage: transaction-report.jar (--export-ofx|--store) <transactions xml> (CURRENT_ACCOUNT|CREDIT_CARD) [<account IBAN>]");
+					"Usage: transaction-report.jar (--convert-to-ofx|--store) <transactions xml> (CURRENT_ACCOUNT|CREDIT_CARD) [<account IBAN>]");
 			return;
 		}
 		try {
-			initDataSource();
-			System.setProperty("javax.xml.accessExternalDTD", "all");
-
 			final String action = args[0];
 			final String filePath = args[1];
 			final String transactionsSource = args[2];
@@ -65,8 +62,10 @@ public class App {
 				transactions = CreditCardTransactionManager.buildTransactions(xmlContent);
 			}
 			if ("--store".equals(action)) {
+				initDataSource();
 				TransactionDao.getInstance().create(transactions);
 			} else if ("--convert-to-ofx".equals(action)) {
+				System.setProperty("javax.xml.accessExternalDTD", "all");
 				final Account account = new Account();
 				final String accountIban = args[3];
 				account.setIban(accountIban);
