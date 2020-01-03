@@ -153,6 +153,10 @@ public class Transaction {
 		amount.appendChild(doc.createTextNode(OfxHelper.AMOUNT_FORMATTER.format(currencyAmount)));
 		transactionNode.appendChild(amount);
 
+		Element currency = doc.createElement(OfxHelper.TAG_CURRENCY);
+		currency.appendChild(doc.createTextNode(this.currency));
+		transactionNode.appendChild(currency);
+
 		Element name = doc.createElement(OfxHelper.TAG_NAME);
 		name.appendChild(doc.createTextNode(counterpart != null ? counterpart : " "));
 		transactionNode.appendChild(name);

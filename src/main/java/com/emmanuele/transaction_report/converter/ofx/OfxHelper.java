@@ -58,6 +58,7 @@ public class OfxHelper {
 	public static final String TAG_DATE_POSTED = "DTPOSTED";
 	public static final String TAG_DATE_USER = "DTUSER";
 	public static final String TAG_TRANSACTION_AMOUNT = "TRNAMT";
+	public static final String TAG_CURRENCY = "CURRENCY";
 	public static final String TAG_TRANSACTION_FITID = "FITID";
 	public static final String TAG_NAME = "NAME";
 	public static final String TAG_MEMO = "MEMO";
