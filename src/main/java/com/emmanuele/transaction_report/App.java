@@ -24,7 +24,7 @@ import com.emmanuele.transaction_report.utils.FileUtils;
 public class App {
 
 	private static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-			+ "<!DOCTYPE table [<!ENTITY euro \"EUR\">]><body>";
+			+ "<!DOCTYPE table [<!ENTITY euro \"EUR\"><!ENTITY nbsp \" \">]><body>";
 	private static final String XML_FOOTER = "</body>";
 
 	private static final String CONFIG_PROPERTIES_FILE = "config.properties";
