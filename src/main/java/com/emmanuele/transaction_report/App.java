@@ -85,7 +85,6 @@ public class App {
 		dataSource.init(DbConf.getInstance());
 		TransactionDao.getInstance().init(dataSource.getDataSource());
 		CurrentAccountTransactionPatternDao.getInstance().init(dataSource.getDataSource());
-		CounterpartyPatternCache.getInstance().init(dataSource.getDataSource());
 	}
 
 	private static String clearXmlContent(final String xmlContent) throws IOException {

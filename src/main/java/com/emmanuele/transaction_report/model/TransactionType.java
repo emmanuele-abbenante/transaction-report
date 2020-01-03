@@ -96,7 +96,11 @@ public enum TransactionType {
 	}
 
 	public static TransactionType getInstance(final String transactionType) {
-		return MAPPING.get(transactionType);
+		final TransactionType instance = MAPPING.get(transactionType);
+		if (instance == null) {
+			throw new IllegalArgumentException("Unknown transaction type: " + transactionType);
+		}
+		return instance;
 	}
 
 }
